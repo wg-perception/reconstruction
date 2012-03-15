@@ -2,7 +2,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 find_package(ecto_pcl REQUIRED)
 find_package(Eigen REQUIRED)
-find_package(image_pipeline REQUIRED)
+find_package(ecto_image_pipeline REQUIRED)
 find_package(object_recognition_core REQUIRED)
 
 find_pcl_package()
@@ -10,9 +10,9 @@ find_pcl_package()
 include_directories(SYSTEM
                     ${ecto_pcl_INCLUDE_DIRS}
                     ${EIGEN_INCLUDE_DIRS}
-                    ${image_pipeline_INCLUDE_DIRS}
-                    ${PCL_INCLUDE_DIRS}
+                    ${ecto_image_pipeline_INCLUDE_DIRS}
                     ${object_recognition_core_INCLUDE_DIRS}
+                    ${PCL_INCLUDE_DIRS}
 )
 
 #deal with the objcog module

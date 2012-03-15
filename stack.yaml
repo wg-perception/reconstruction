@@ -5,7 +5,7 @@ Author: Ethan Rublee <erublee@willowgarage.com>, Vincent Rabaud <vrabaud@willowg
 Maintainer:  Vincent Rabaud <vrabaud@willowgarage.com>
 Homepage:  http://ecto.willowgarage.com/recognition
 
-Depends: catkin, ecto, object_recognition_core
+Depends: catkin, ecto, ecto_image_pipeline, object_recognition_core
 
 Catkin-CopyrightType:  willowgarage
 Catkin-DebRulesType: cmake
