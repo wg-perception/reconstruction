@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import roscompat
 import sys
 import argparse
 import time
@@ -14,13 +13,12 @@ import ecto,ecto_ros
 from ecto_opencv import calib, highgui, imgproc
 import object_recognition_core
 from object_recognition_core.db import dbtools, models
-import image_pipeline
-import image_pipeline_conversion
-from ecto_object_recognition import object_recognition_db
-from reconstruction import reconstruction
+import ecto_image_pipeline.base
+import ecto_image_pipeline.conversion
+import reconstruction
 import ecto_pcl
 from tempfile import NamedTemporaryFile
-from ecto_object_recognition.object_recognition_db import DbDocuments
+from object_recognition_core.db.object_db import DbDocuments
 
 cloud_view = ecto_pcl.CloudViewer("Cloud Display", window_name="PCD Viewer")[:]
 imshows = dict(image=highgui.imshow('Image Display', name='image')[:], mask=highgui.imshow('Mask Display', name='mask')[:],
@@ -159,7 +157,7 @@ def parse_args():
     parser.add_argument('--visualize', dest='visualize', action='store_const',
                         const=True, default=False,
                         help='Turn on visualization')
-    object_recognition.dbtools.add_db_arguments(parser)
+    object_recognition_core.db.dbtools.add_db_arguments(parser)
 
     sched_group = parser.add_argument_group('Scheduler Options')
     from ecto.opts import scheduler_options

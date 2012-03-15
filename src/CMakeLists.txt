@@ -35,7 +35,7 @@ set_target_properties(reconstruction_ectomodule
 link_ecto(reconstruction
           ${PCL_LIBRARIES}
           ${OpenCV_LIBS}
-          object_recognition_core_db
+          ${object_recognition_core_LIBRARIES}
 )
 
 install_ecto_module(reconstruction)
