@@ -42,4 +42,4 @@ link_ecto(reconstruction
           ${OpenCV_LIBS}
 )
 
-install_ecto_module()
+install_ecto_module(reconstruction)
