@@ -32,10 +32,6 @@ set_target_properties(reconstruction_ectomodule
       COMPILE_FLAGS "-Wno-unknown-pragmas -Wno-unused-but-set-variable"
       )
 
-message(INFO ${PCL_LIBRARIES})
-message(INFO ${OpenCV_LIBS})
-message(INFO ${object_recognition_core_LIBRARIES})
-
 link_ecto(reconstruction
           ${object_recognition_core_LIBRARIES}
           ${PCL_LIBRARIES}
