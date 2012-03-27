@@ -6,6 +6,8 @@ catkin_stack()
 catkin_project(reconstruction)
 
 find_package(ecto REQUIRED)
+set_ecto_install_package_name()
+
 find_package(object_recognition_core REQUIRED)
 
 #set_ecto_install_package_name()
