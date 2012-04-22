@@ -21,9 +21,8 @@ namespace reconstruction
               const std::string& mesh_file, const std::string& surfel_file)
   {
     using namespace object_recognition_core::db;
-    ObjectDbParameters params;
-    params.root_ = db_url;
-    params.type_ = ObjectDbParameters::COUCHDB;
+    ObjectDbParameters params(ObjectDbParameters::COUCHDB);
+    params.set_parameter("root", db_url);
     ObjectDb db(params);
     Document doc(db, "meshes");
     std::ifstream mesh_stream(mesh_file.c_str());
