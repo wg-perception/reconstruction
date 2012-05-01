@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
-project(reconstruction)
+project(object_recognition_reconstruction)
 
 find_package(catkin)
 catkin_stack()
-catkin_project(reconstruction)
+catkin_project(object_recognition_reconstruction)
 
 find_package(ecto REQUIRED)
 set_ecto_install_package_name()
