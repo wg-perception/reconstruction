@@ -36,6 +36,7 @@ link_ecto(reconstruction
           ${object_recognition_core_LIBRARIES}
           ${PCL_LIBRARIES}
           ${OpenCV_LIBS}
+          ${OpenCV_LIBRARIES}
 )
 
 install_ecto_module(reconstruction)
