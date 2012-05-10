@@ -4,8 +4,8 @@ Reconstruction
 ``Reconstruction`` provides a utility to create a 3d reconstruction of an object. For now, it creates
 an approximate untextured mesh from captured data, that is good enough for grasping.
 
-Comman Line
------------
+Command Line
+------------
 
 From the command line, you want to execute the following command to compute all meshes and commit them to the local DB:
 
