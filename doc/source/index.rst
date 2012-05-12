@@ -18,3 +18,16 @@ Or tune your parameters using the appropriate command line arguments:
 .. program-output:: ../../apps/mesh_object --help
     :prompt:
     :in_srcdir:
+
+Web Interface
+-------------
+
+Reconstruction also provides a web interface to visualize the different meshes. In your build folder, just run:
+
+.. code-block:: sh
+
+    make or_web_ui
+
+You can then visualize the meshes here: `http://localhost:5984/or_web_ui/_design/viewer/index.html <http://localhost:5984/or_web_ui/_design/viewer/index.html>`_
+
+
