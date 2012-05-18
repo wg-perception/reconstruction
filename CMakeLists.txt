@@ -20,6 +20,7 @@ install(DIRECTORY apps/
         USE_SOURCE_PERMISSIONS
         PATTERN "*.bag" EXCLUDE
         PATTERN "*.pyc" EXCLUDE
+        PATTERN "roscompat*" EXCLUDE
 )
 
 # add tests
