@@ -16,8 +16,8 @@ import ecto_image_pipeline.conversion
 import reconstruction
 import ecto_pcl
 from tempfile import NamedTemporaryFile
-from object_recognition_core.db.object_db import DbDocuments, ObjectDb
-from object_recognition_core.ecto_cells.db import ObservationReader
+from object_recognition_core.db import DbDocuments, ObjectDb
+from object_recognition_core.db.cells import ObservationReader
 
 cloud_view = ecto_pcl.CloudViewer("Cloud Display", window_name="PCD Viewer")[:]
 imshows = dict(image=highgui.imshow('Image Display', name='image')[:], mask=highgui.imshow('Mask Display', name='mask')[:],
