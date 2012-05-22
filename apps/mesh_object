@@ -16,7 +16,7 @@ import ecto_image_pipeline.conversion
 import reconstruction
 import ecto_pcl
 from tempfile import NamedTemporaryFile
-from object_recognition_core.db import DbDocuments, ObjectDb
+from object_recognition_core.db import Documents, ObjectDb
 from object_recognition_core.db.cells import ObservationReader
 
 cloud_view = ecto_pcl.CloudViewer("Cloud Display", window_name="PCD Viewer")[:]
@@ -80,7 +80,7 @@ def simple_mesh_session(dbs, session, args):
     db_reader = ObservationReader('Database Source')
 
     #observation dealer will deal out each observation id.
-    observation_dealer = ecto.Dealer(tendril=db_reader.inputs.at('document'), iterable=DbDocuments(ObjectDb(db_params), obs_ids))
+    observation_dealer = ecto.Dealer(tendril=db_reader.inputs.at('document'), iterable=Documents(ObjectDb(db_params), obs_ids))
     depthTo3d = calib.DepthTo3d('Depth ~> 3D')
     erode = imgproc.Erode('Mask Erosion', kernel=3) #-> 7x7
     rescale_depth = RescaledRegisteredDepth('Depth scaling') #this is for SXGA mode scale handling.
