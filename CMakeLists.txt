@@ -15,6 +15,7 @@ find_package(object_recognition_core REQUIRED)
 
 add_subdirectory(src)
 
+if (ROS_ELECTRIC_FOUND)
 install(DIRECTORY apps/
         DESTINATION bin
         USE_SOURCE_PERMISSIONS
@@ -22,6 +23,12 @@ install(DIRECTORY apps/
         PATTERN "*.pyc" EXCLUDE
         PATTERN "roscompat*" EXCLUDE
 )
+else()
+# install the applications
+install(PROGRAMS ${PROJECT_SOURCE_DIR}/apps/mesh_object
+        DESTINATION share/${PROJECT_NAME}/bin
+)
+endif()
 
 # add tests
 option(BUILD_TEST "Build tests" ON)
