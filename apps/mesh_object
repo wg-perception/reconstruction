@@ -9,7 +9,7 @@ import couchdb
 import ecto
 from ecto_opencv import calib, highgui, imgproc
 import object_recognition_core
-from object_recognition_core.db import dbtools, models
+from object_recognition_core.db import tools as dbtools, models
 from ecto_image_pipeline.base import RescaledRegisteredDepth
 import ecto_image_pipeline.base
 import ecto_image_pipeline.conversion
@@ -156,7 +156,7 @@ def parse_args():
     parser.add_argument('--visualize', dest='visualize', action='store_const',
                         const=True, default=False,
                         help='Turn on visualization')
-    object_recognition_core.db.dbtools.add_db_arguments(parser)
+    dbtools.add_db_arguments(parser)
 
     sched_group = parser.add_argument_group('Scheduler Options')
     from ecto.opts import scheduler_options
