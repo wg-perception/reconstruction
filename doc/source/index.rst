@@ -1,5 +1,5 @@
-Reconstruction
-==============
+object_recognition_reconstruction: 3D Object Reconstruction
+===========================================================
 
 ``Reconstruction`` provides a utility to create a 3d reconstruction of an object. For now, it creates
 an approximate untextured mesh from captured data, that is good enough for grasping.
@@ -29,5 +29,3 @@ Reconstruction also provides a web interface to visualize the different meshes. 
     make or_web_ui
 
 You can then visualize the meshes here: `http://localhost:5984/or_web_ui/_design/viewer/index.html <http://localhost:5984/or_web_ui/_design/viewer/index.html>`_
-
-
