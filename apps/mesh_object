@@ -13,7 +13,7 @@ from object_recognition_core.db import tools as dbtools, models
 from ecto_image_pipeline.base import RescaledRegisteredDepth
 import ecto_image_pipeline.base
 import ecto_image_pipeline.conversion
-import reconstruction
+import object_recognition_reconstruction
 import ecto_pcl
 from tempfile import NamedTemporaryFile
 from object_recognition_core.db import Documents, ObjectDb

@@ -7,7 +7,7 @@ namespace reconstruction
               const std::string& mesh_file, const std::string& surfel_file);
 }
 
-ECTO_DEFINE_MODULE(reconstruction)
+ECTO_DEFINE_MODULE(object_recognition_reconstruction)
 {
   boost::python::def("insert_mesh", reconstruction::insert_mesh);
 }

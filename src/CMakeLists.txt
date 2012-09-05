@@ -16,7 +16,7 @@ include_directories(SYSTEM
 )
 
 #deal with the objcog module
-ectomodule(reconstruction
+ectomodule(object_recognition_reconstruction INSTALL
   module.cpp
   #surfel_conversion.cpp
   #surfels.cpp
@@ -27,16 +27,14 @@ ectomodule(reconstruction
   PointCloudMesh.cpp
   )
 
-set_target_properties(reconstruction_ectomodule
+set_target_properties(object_recognition_reconstruction_ectomodule
       PROPERTIES
       COMPILE_FLAGS "-Wno-unknown-pragmas -Wno-unused-but-set-variable"
       )
 
-link_ecto(reconstruction
+link_ecto(object_recognition_reconstruction
           ${object_recognition_core_LIBRARIES}
           ${PCL_LIBRARIES}
           ${OpenCV_LIBS}
           ${OpenCV_LIBRARIES}
 )
-
-install_ecto_module(reconstruction)
