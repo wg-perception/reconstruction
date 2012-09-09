@@ -20,10 +20,17 @@ install(DIRECTORY apps/
         PATTERN "*.pyc" EXCLUDE
         PATTERN "roscompat*" EXCLUDE
 )
-else()
+endif()
+if (ROS_FUERTE_FOUND)
 # install the applications
 install(PROGRAMS ${PROJECT_SOURCE_DIR}/apps/mesh_object
         DESTINATION share/${PROJECT_NAME}/bin
+)
+endif()
+if (ROS_GROOVY_OR_ABOVE_FOUND)
+# install the applications
+install(PROGRAMS ${PROJECT_SOURCE_DIR}/apps/mesh_object
+        DESTINATION ${CATKIN_PROJECT_BIN_DESTINATION}
 )
 endif()
 
