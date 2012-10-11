@@ -22,7 +22,6 @@ install(DIRECTORY apps/
         USE_SOURCE_PERMISSIONS
         PATTERN "*.bag" EXCLUDE
         PATTERN "*.pyc" EXCLUDE
-        PATTERN "roscompat*" EXCLUDE
 )
 endif()
 if (ROS_FUERTE_FOUND)
