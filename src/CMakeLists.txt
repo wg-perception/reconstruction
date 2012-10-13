@@ -4,8 +4,7 @@ find_package(ecto_pcl REQUIRED)
 find_package(Eigen REQUIRED)
 find_package(ecto_image_pipeline REQUIRED)
 find_package(object_recognition_core REQUIRED)
-
-find_pcl_package()
+find_package(PCL REQUIRED)
 
 include_directories(SYSTEM
                     ${ecto_pcl_INCLUDE_DIRS}
