@@ -3,8 +3,6 @@ import sys
 import argparse
 import os
 
-import couchdb
-
 import ecto
 from ecto_opencv import calib, highgui, imgproc
 import object_recognition_core
@@ -17,6 +15,7 @@ import ecto_pcl
 from tempfile import NamedTemporaryFile
 from object_recognition_core.db import Documents, ObjectDb
 from object_recognition_core.db.cells import ObservationReader
+import couchdb
 
 cloud_view = ecto_pcl.CloudViewer("Cloud Display", window_name="PCD Viewer")[:]
 imshows = dict(image=highgui.imshow('Image Display', name='image')[:], mask=highgui.imshow('Mask Display', name='mask')[:],
