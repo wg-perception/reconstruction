@@ -5,8 +5,10 @@
 
 #include "poseRT.hpp"
 
-//#define TEST_RVIZ_RENDERING
+
 using namespace cv;
+using std::cout;
+using std::endl;
 
 void publishOdometry(const std::vector<cv::Mat> &poses, const std::string &topicName)
 {
@@ -67,7 +69,6 @@ void publishOdometry(const cv::Mat &poseMat, const std::string &topicName)
 
   //TODO: move up
   ros::Rate r(1.0);
-  ros::spinOnce();               // check for incoming messages
   current_time = ros::Time::now();
 
   //first, we'll publish the transform over tf
