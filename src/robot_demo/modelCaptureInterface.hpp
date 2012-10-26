@@ -2,6 +2,8 @@
 #define MODEL_CAPTURE_INTERFACE_HPP
 
 #include <opencv2/core/core.hpp>
+//TODO: use splitted code
+#include "../../opencv_candidate/src/rgbd/samples/model_capture/model_capture.hpp"
 
 class ModelCapturer
 {
@@ -12,6 +14,8 @@ class ModelCapturer
   private:
     std::vector<cv::Mat> allBgrImages, allDepths;
     bool isLoopClosed;
+    OnlineCaptureServer onlineCaptureServer;
+    cv::Mat cameraMatrix;
 };
 
 #endif

@@ -68,7 +68,7 @@ void publishOdometry(const cv::Mat &poseMat, const std::string &topicName)
   static ros::Time current_time = ros::Time::now();
 
   //TODO: move up
-  ros::Rate r(1.0);
+  ros::Rate r(100.0);
   current_time = ros::Time::now();
 
   //first, we'll publish the transform over tf

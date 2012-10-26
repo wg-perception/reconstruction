@@ -1,7 +1,7 @@
 #include <opencv2/opencv.hpp>
 #include "modelCaptureInterface.hpp"
 #include "dataGrabbing.hpp"
-//#include "rosUtils.hpp"
+#include "rosUtils.hpp"
 
 using namespace cv;
 using std::cout;
@@ -32,10 +32,20 @@ int main(int argc, char *argv[])
   }
 #endif
 
-//     RGBDGrabber rgbdGrabber(bgrImageTopic, depthTopic, queueSize);
+
+  //this initialization is needed for RViz
+  Mat eye = Mat::eye(4, 4, CV_64FC1);
+  //TODO: move up
+  publishOdometry(eye, "RGBDOdometry");
+  publishOdometry(eye, "LoopClosure");
+  publishOdometry(eye, "RgbdICP");
+  publishOdometry(eye, "RgbdICP_landmarks");
+
+//  RGBDGrabber rgbdGrabber(bgrImageTopic, depthTopic, queueSize);
   RGBDExporter rgbdExporter(basePath);
 
   ros::spin();
+
 
   return 0;
 }

@@ -11,6 +11,17 @@ using std::endl;
 ModelCapturer::ModelCapturer()
 {
   isLoopClosed = false;
+
+  //TODO: move up
+  cameraMatrix = (Mat_<float>(3, 3) << 525.0,   0.0, 319.5,
+                                         0.0, 525.0, 239.5,
+                                         0.0,   0.0,   1.0);
+  onlineCaptureServer.set("cameraMatrix", cameraMatrix);
+
+  //TODO: move up
+  onlineCaptureServer.set("minTranslationDiff", 0.15f);
+  onlineCaptureServer.set("minRotationDiff", 15.0f);
+  onlineCaptureServer.initialize(Size(640, 480));
 }
 
 void ModelCapturer::addRGBDFrame(const cv::Mat &bgrImage, const cv::Mat &depth)
@@ -24,8 +35,22 @@ void ModelCapturer::addRGBDFrame(const cv::Mat &bgrImage, const cv::Mat &depth)
   CV_Assert(depth.type() == CV_32FC1);
   CV_Assert(bgrImage.size() == depth.size());
 
+  static int frameID = 0;
+  Mat currentPose = onlineCaptureServer.push(bgrImage, depth, frameID);
+  ++frameID;
+
+  //TODO: move up
+  publishOdometry(currentPose, "RGBDOdometry");
+
+
+
+
   allBgrImages.push_back(bgrImage);
   allDepths.push_back(depth);
+
+
+
+
 
   //TODO: remove, use loop closure detection from the algorithm
   imshow("bgr view", bgrImage);
@@ -42,154 +67,51 @@ void ModelCapturer::addRGBDFrame(const cv::Mat &bgrImage, const cv::Mat &depth)
 void ModelCapturer::createModel()
 {
   CV_Assert(allBgrImages.size() == allDepths.size());
-  //TODO: remove dumping
-#if 0
-  cout << "number of collected images:" << allBgrImages.size() << endl;
-  for (size_t i = 0; i < allBgrImages.size(); ++i)
-  {
-//    imshow("p i", allBgrImages[i]);
-//    imshow("p d", allDepths[i]);
-//    waitKey();
-    std::stringstream bgrImageFilename;
-    bgrImageFilename << "data/image_" << std::setfill('0') << std::setw(5) << i << ".png";
-    cout << bgrImageFilename.str() << endl;
-    imwrite(bgrImageFilename.str(), allBgrImages[i]);
+  CV_Assert(!allBgrImages[0].empty());
 
-    std::stringstream depthFilename;
-    depthFilename << "data/depth_image_" << std::setfill('0') << std::setw(5) << i << ".xml.gz";
-    FileStorage fs(depthFilename.str(), FileStorage::WRITE);
-    fs << "depth_image" << allDepths[i];
-    fs.release();
-  }
-#endif
-
-
-
-
-  //TODO: use the function from upcoming splitted code
-  Ptr<Odometry> odometry = Algorithm::create<Odometry>("RGBD.RgbdOdometry");
-  if(odometry.empty())
-  {
-      cout << "Can not create Odometry algorithm. Check the passed odometry name." << endl;
-      return -1;
-  }
-  float vals[] = {525., 0., 3.1950000000000000e+02,
-                  0., 525., 2.3950000000000000e+02,
-                  0., 0., 1.};
-  Mat cameraMatrix = Mat(3,3,CV_32FC1,vals).clone();
-  odometry->set("cameraMatrix", cameraMatrix);
-
-  // Create normals computer
-  Ptr<RgbdNormals> normalsComputer = new cv::RgbdNormals(allDepths[0].rows, allDepths[0].cols, allDepths[0].depth(), cameraMatrix);
-
-  // Fill vector of initial frames
-  vector<Ptr<OdometryFrameCache> > frames;
-  vector<Mat> tableMasks, tableWithObjectMasks;
-  for(size_t i = 0; i < allBgrImages.size(); i++)
-  {
-      Ptr<OdometryFrameCache> frame;
-
-      Mat gray;
-      cvtColor(allBgrImages[i], gray, CV_BGR2GRAY);
-      {
-          Mat tmp;
-          medianBlur(gray, tmp, 3);
-          gray = tmp;
-      }
-
-      Mat cloud;
-      depthTo3d(allDepths[i], cameraMatrix, cloud);
-
-      Mat normals = (*normalsComputer)(cloud);
-
-      Mat tableWithObjectMask, tableMask;
-      cout << "Masking the frame " << i << endl;
-      if(!computeTableWithObjectMask(cloud, normals, cameraMatrix, tableWithObjectMask, 0.1, &tableMask))
-      {
-          cout << "Skip the frame because calcTableWithObjectMask was failed" << endl;
-      }
-      else
-      {
-          frame = new OdometryFrameCache();
-          frame->image = gray;
-          frame->depth = allDepths[i];
-          CV_Assert(!tableWithObjectMask.empty());
-          frame->mask = tableWithObjectMask;
-          frame->normals = normals;
-      }
-
-      frames.push_back(frame);
-      tableMasks.push_back(tableMask.clone());
-      tableWithObjectMasks.push_back(tableWithObjectMask.clone());
-  }
-
-  vector<Ptr<OdometryFrameCache> > keyframes;
-  vector<Mat> keyframePoses;
-  vector<int> indicesToBgrImages; // to frames vector
-  if(!frameToFrameProcess(frames, cameraMatrix, odometry, keyframes, keyframePoses, &indicesToBgrImages))
-      return -1;
-#if 1
-  for(size_t i = 0; i < frames.size(); i++)
-  {
-      if(find(indicesToBgrImages.begin(), indicesToBgrImages.end(), i) == indicesToBgrImages.end())
-      {
-          frames[i].release();
-          allBgrImages[i].release();
-          allDepths[i].release();
-      }
-  }
-#endif
-
-  //TODO: move up
-  cout << "publishing odometry... " << keyframePoses.size() << endl;
-  publishOdometry(keyframePoses, "RGBDOdometry");
+  Ptr<KeyframesData> keyframesData = onlineCaptureServer.finalize();
 
   cout << "Frame-to-frame odometry result" << endl;
-  showModel(allBgrImages, indicesToBgrImages, keyframes, keyframePoses, cameraMatrix, 0.005);
+  //TODO: move up
+//  publishOdometry(keyframesData->poses, "RGBDOdometry");
+  showModel(allBgrImages, keyframesData->frames, keyframesData->poses, cameraMatrix, 0.005);
 
   vector<Mat> refinedPosesSE3;
-  refineSE3Poses(keyframePoses, refinedPosesSE3);
-
-  //TODO: move up
-  publishOdometry(refinedPosesSE3, "LoopClosure");
+  refineSE3Poses(keyframesData->poses, refinedPosesSE3);
 
   cout << "Result of the loop closure" << endl;
-  showModel(allBgrImages, indicesToBgrImages, keyframes, refinedPosesSE3, cameraMatrix, 0.003);
+  //TODO: move up
+  publishOdometry(refinedPosesSE3, "LoopClosure");
+  showModel(allBgrImages, keyframesData->frames, refinedPosesSE3, cameraMatrix, 0.003);
 
   vector<Mat> refinedPosesICPSE3;
   float pointsPart = 0.05f;
-  refineRgbdICPSE3Poses(keyframes, refinedPosesSE3, cameraMatrix, pointsPart, refinedPosesICPSE3);
-
-  //TODO: move up
-  publishOdometry(refinedPosesICPSE3, "RgbdICP");
+  refineRgbdICPSE3Poses(keyframesData->frames, refinedPosesSE3, cameraMatrix, pointsPart, refinedPosesICPSE3);
 
   cout << "Result of RgbdICP for camera poses" << endl;
+  //TODO: move up
+  publishOdometry(refinedPosesICPSE3, "RgbdICP");
   float modelVoxelSize = 0.003f;
-  showModel(allBgrImages, indicesToBgrImages, keyframes, refinedPosesICPSE3, cameraMatrix, modelVoxelSize);
+  showModel(allBgrImages, keyframesData->frames, refinedPosesICPSE3, cameraMatrix, modelVoxelSize);
 
 #if 1
   // remove table from the further refinement
-  for(size_t i = 0; i < keyframes.size(); i++)
+  for(size_t i = 0; i < keyframesData->frames.size(); i++)
   {
-      keyframes[i]->mask = tableWithObjectMasks[indicesToBgrImages[i]] & ~tableMasks[indicesToBgrImages[i]];
-      keyframes[i]->pyramidMask.clear();
-      keyframes[i]->pyramidTexturedMask.clear();
-      keyframes[i]->pyramidNormalsMask.clear();
-      keyframes[i]->pyramidMask.clear();
+      keyframesData->frames[i]->mask &= ~keyframesData->tableMasks[i];
+      keyframesData->frames[i]->releasePyramids();
   }
   pointsPart = 1.f;
   modelVoxelSize = 0.001;
 #endif
 
   vector<Mat> refinedPosesICPSE3Landmarks;
-  refineICPSE3Landmarks(keyframes, refinedPosesICPSE3, cameraMatrix, refinedPosesICPSE3Landmarks);
-
-  //TODO: move up
-  publishOdometry(refinedPosesICPSE3Landmarks, "RgbdICP_landmarks");
+  refineICPSE3Landmarks(keyframesData->frames, refinedPosesICPSE3, cameraMatrix, refinedPosesICPSE3Landmarks);
 
   cout << "Result of RgbdICP for camera poses and moving the model points" << endl;
+  //TODO: move up
+  publishOdometry(refinedPosesICPSE3Landmarks, "RgbdICP_landmarks");
   modelVoxelSize = 0.000001;
-  showModel(allBgrImages, indicesToBgrImages, keyframes, refinedPosesICPSE3Landmarks, cameraMatrix, modelVoxelSize);
-//    showModelWithNormals(allBgrImages, indicesToBgrImages, keyframes, refinedPosesICPSE3Landmarks, cameraMatrix);
-
+  showModel(allBgrImages, keyframesData->frames, refinedPosesICPSE3Landmarks, cameraMatrix, modelVoxelSize);
+//    showModelWithNormals(allBgrImages, keyframesData->frame, refinedPosesICPSE3Landmarks, cameraMatrix);
 }

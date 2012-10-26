@@ -43,7 +43,7 @@ link_ecto(object_recognition_reconstruction
 )
 
 
-set(USE_ON_ROBOT False)
+set(USE_ON_ROBOT True)
 if (USE_ON_ROBOT)
   include_directories(SYSTEM /usr/include/suitesparse)
 
@@ -79,6 +79,7 @@ if (USE_ON_ROBOT)
                             ../../opencv_candidate/src/rgbd/samples/model_capture/create_optimizer.hpp
                             ../../opencv_candidate/src/rgbd/samples/model_capture/load_data.cpp
                             ../../opencv_candidate/src/rgbd/samples/model_capture/mask_data.cpp
+                            ../../opencv_candidate/src/rgbd/samples/model_capture/model_capture_init.cpp
                             ../../opencv_candidate/src/rgbd/samples/model_capture/frame_to_frame.cpp
                             ../../opencv_candidate/src/rgbd/samples/model_capture/graph_se3.cpp
                             ../../opencv_candidate/src/rgbd/samples/model_capture/graph_se3_rgbd_icp.cpp
