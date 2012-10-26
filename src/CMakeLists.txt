@@ -43,7 +43,7 @@ link_ecto(object_recognition_reconstruction
 )
 
 
-set(USE_ON_ROBOT True)
+set(USE_ON_ROBOT False)
 if (USE_ON_ROBOT)
   include_directories(SYSTEM /usr/include/suitesparse)
 
