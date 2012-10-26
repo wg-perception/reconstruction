@@ -69,6 +69,9 @@ if (USE_ON_ROBOT)
   find_package(ROS COMPONENTS roscpp)
   add_executable(robot_demo robot_demo/robot_demo.cpp
                             robot_demo/poseRT.cpp
+                            robot_demo/rosUtils.cpp
+                            robot_demo/modelCaptureInterface.cpp
+                            robot_demo/dataGrabbing.cpp
 
 #TODO: link with a library after splitting the code
                             ../../opencv_candidate/src/rgbd/samples/model_capture/model_capture.hpp
