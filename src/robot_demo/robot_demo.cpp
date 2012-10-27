@@ -14,7 +14,8 @@ int main(int argc, char *argv[])
 //  const string depthTopic = "/head_camera/depth_registered/image";
   const string bgrImageTopic = "/head_mount_kinect/rgb/image_color";
   const string depthTopic = "/head_mount_kinect/depth/image";
-  const uint32_t queueSize = 15; //1
+//  const uint32_t queueSize = 15; //1
+  const uint32_t queueSize = 2; //1
 
   const string basePath = (argc == 2) ? argv[1] : "";
 
@@ -29,9 +30,10 @@ int main(int argc, char *argv[])
   for (size_t i = 0; i < 100; ++i)
   {
     publishOdometry(Mat::eye(4, 4, CV_64FC1), "RGBDOdometry");
+    sleep(2);
   }
-#endif
 
+#endif
 
   //this initialization is needed for RViz
   Mat eye = Mat::eye(4, 4, CV_64FC1);
@@ -41,8 +43,8 @@ int main(int argc, char *argv[])
   publishOdometry(eye, "RgbdICP");
   publishOdometry(eye, "RgbdICP_landmarks");
 
-//  RGBDGrabber rgbdGrabber(bgrImageTopic, depthTopic, queueSize);
-  RGBDExporter rgbdExporter(basePath);
+  RGBDGrabber rgbdGrabber(bgrImageTopic, depthTopic, queueSize);
+//  RGBDExporter rgbdExporter(basePath);
 
   ros::spin();
 

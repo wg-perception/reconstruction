@@ -1,6 +1,7 @@
 #include "rosUtils.hpp"
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
+#include <tf/transform_listener.h>
 #include <nav_msgs/Odometry.h>
 
 #include "poseRT.hpp"
@@ -20,6 +21,7 @@ void publishOdometry(const std::vector<cv::Mat> &poses, const std::string &topic
 
 void publishOdometry(const cv::Mat &poseMat, const std::string &topicName)
 {
+  std::cout << "publishing..." << std::endl;
   static ros::NodeHandle nh;
 
   static std::map<string, ros::Publisher> odometryPublishers;
@@ -31,8 +33,6 @@ void publishOdometry(const cv::Mat &poseMat, const std::string &topicName)
     const uint32_t queueSize = 50;
     odom_pub = nh.advertise<nav_msgs::Odometry>(topicName, queueSize);
   }
-
-  tf::TransformBroadcaster odom_broadcaster;
 
   PoseRT pose(poseMat);
   Mat tvec = pose.getTvec();
@@ -65,37 +65,36 @@ void publishOdometry(const cv::Mat &poseMat, const std::string &topicName)
   quaternion.w = 1.0;
 #endif
 
-  static ros::Time current_time = ros::Time::now();
+  //TODO: move up
+//  const string frame = "odom_combined";
+//  cosnt string frame = "head_mount_kinect_rgb_optical_frame";
+  const string rgbdOdometryFrame = "odom_rgbd";
 
   //TODO: move up
   ros::Rate r(100.0);
-  current_time = ros::Time::now();
+  ros::Time current_time = ros::Time::now();
 
-  //first, we'll publish the transform over tf
-  geometry_msgs::TransformStamped odom_trans;
-  odom_trans.header.stamp = current_time;
-//  odom_trans.header.frame_id = "odom";
-//  odom_trans.header.frame_id = "base_link";
-  //TODO: move up
-  odom_trans.header.frame_id = "head_mount_kinect_rgb_optical_frame";
-  odom_trans.child_frame_id = "base_link";
+  static tf::StampedTransform transform;
+  static bool isTransformInitialized = false;
+  if (!isTransformInitialized)
+  {
+      tf::TransformListener listener;
+      //TODO: move up
+      ros::spinOnce();
+      listener.waitForTransform("/odom_combined", "/head_mount_kinect_rgb_optical_frame", current_time, ros::Duration(10.0));
+      listener.lookupTransform("/odom_combined", "/head_mount_kinect_rgb_optical_frame", ros::Time(0), transform);
+      transform.child_frame_id_ = rgbdOdometryFrame;
+      isTransformInitialized = true;
+  }
+  transform.stamp_ = current_time;
 
-  odom_trans.transform.translation.x = x;
-  odom_trans.transform.translation.y = y;
-  odom_trans.transform.translation.z = z;
-
-  odom_trans.transform.rotation = quaternion;
-
-  //send the transform
-  odom_broadcaster.sendTransform(odom_trans);
+  static tf::TransformBroadcaster br;
+  br.sendTransform(transform);
 
   //next, we'll publish the odometry message over ROS
   nav_msgs::Odometry odom;
   odom.header.stamp = current_time;
-  //TODO: move up
-//  odom.header.frame_id = "odom";
-//  odom.header.frame_id = "base_link";
-  odom.header.frame_id = "head_mount_kinect_rgb_optical_frame";
+  odom.header.frame_id = rgbdOdometryFrame;
 
   //set the position
   odom.pose.pose.position.x = x;
@@ -110,7 +109,7 @@ void publishOdometry(const cv::Mat &poseMat, const std::string &topicName)
 #endif
 
   //set the velocity
-  odom.child_frame_id = "base_link";
+  odom.child_frame_id = rgbdOdometryFrame;
   //different values don't change RViz vizualization
   odom.twist.twist.linear.x = 0.0;
   odom.twist.twist.linear.y = 0.0;
@@ -120,5 +119,5 @@ void publishOdometry(const cv::Mat &poseMat, const std::string &topicName)
   odom_pub.publish(odom);
 
   r.sleep();
-  std::cout << "publishing..." << std::endl;
+  std::cout << "Done..." << std::endl;
 }

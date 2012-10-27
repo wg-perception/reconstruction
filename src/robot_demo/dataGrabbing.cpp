@@ -5,6 +5,8 @@
 #include "../../opencv_candidate/src/rgbd/samples/model_capture/model_capture.hpp"
 
 using namespace cv;
+using std::cout;
+using std::endl;
 
 RGBDGrabber::RGBDGrabber(const string &bgrImageTopic, const string &depthTopic, uint32_t queueSize) :
     imageTransport(nh),
@@ -38,6 +40,7 @@ void RGBDGrabber::callback(const sensor_msgs::ImageConstPtr &bgrImageMsg, const 
   {
     ROS_ERROR("cv_bridge exception: %s", e.what());
   }
+  cout << "exit from callback" << endl;
 }
 
 RGBDExporter::RGBDExporter(const std::string &basePath)

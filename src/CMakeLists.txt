@@ -111,4 +111,5 @@ if (USE_ON_ROBOT)
                                    ${CHOLMOD_LIBRARIES}
                                    ${CSPARSE_LIBRARY} /opt/ros/groovy/lib/libg2o_csparse_extension.so
   )
+  set_target_properties(robot_demo PROPERTIES COMPILE_FLAGS "-fopenmp" LINK_FLAGS "-fopenmp")
 endif()

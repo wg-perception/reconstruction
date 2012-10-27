@@ -36,7 +36,9 @@ void ModelCapturer::addRGBDFrame(const cv::Mat &bgrImage, const cv::Mat &depth)
   CV_Assert(bgrImage.size() == depth.size());
 
   static int frameID = 0;
+  cout << "pushing frame..." << std::flush;
   Mat currentPose = onlineCaptureServer.push(bgrImage, depth, frameID);
+  cout << " done." << endl;
   ++frameID;
 
   //TODO: move up
@@ -49,14 +51,12 @@ void ModelCapturer::addRGBDFrame(const cv::Mat &bgrImage, const cv::Mat &depth)
   allDepths.push_back(depth);
 
 
-
-
-
+/*
   //TODO: remove, use loop closure detection from the algorithm
   imshow("bgr view", bgrImage);
-  imshow("depth view", depth);
   //TODO: move up
-  int key = waitKey(30);
+*/
+  int key = waitKey(3);
   if (key == 27) //escape
   {
     isLoopClosed = true;
@@ -68,6 +68,30 @@ void ModelCapturer::createModel()
 {
   CV_Assert(allBgrImages.size() == allDepths.size());
   CV_Assert(!allBgrImages[0].empty());
+
+#if 0
+  cout << "number of collected images:" << allBgrImages.size() << endl;
+  for (size_t i = 0; i < allBgrImages.size(); ++i)
+  {
+//    imshow("p i", allBgrImages[i]);
+//    imshow("p d", allDepths[i]);
+//    waitKey();
+    std::stringstream bgrImageFilename;
+    bgrImageFilename << "data/image_" << std::setfill('0') << std::setw(5) << i << ".png";
+    cout << bgrImageFilename.str() << endl;
+    imwrite(bgrImageFilename.str(), allBgrImages[i]);
+
+    std::stringstream depthFilename;
+    depthFilename << "data/depth_image_" << std::setfill('0') << std::setw(5) << i << ".xml.gz";
+    FileStorage fs(depthFilename.str(), FileStorage::WRITE);
+    fs << "depth_image" << allDepths[i];
+    fs.release();
+  }
+#endif
+
+
+
+
 
   Ptr<KeyframesData> keyframesData = onlineCaptureServer.finalize();
 
