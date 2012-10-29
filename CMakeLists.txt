@@ -11,6 +11,9 @@ catkin_stack()
 catkin_project(object_recognition_reconstruction DEPENDS ecto ecto_image_pipeline ecto_pcl object_recognition_core)
 endif()
 
+find_package(ecto REQUIRED)
+find_package(object_recognition_core REQUIRED)
+
 add_subdirectory(src)
 
 if (ROS_FUERTE_FOUND)
