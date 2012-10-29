@@ -105,5 +105,3 @@ if (USE_ON_ROBOT)
   )
   set_target_properties(robot_demo PROPERTIES COMPILE_FLAGS "-fopenmp" LINK_FLAGS "-fopenmp")
 endif()
-
-add_subdirectory(renderer)
