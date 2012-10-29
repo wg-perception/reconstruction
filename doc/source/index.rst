@@ -29,3 +29,9 @@ Reconstruction also provides a web interface to visualize the different meshes. 
     make or_web_ui
 
 You can then visualize the meshes here: `http://localhost:5984/or_web_ui/_design/viewer/index.html <http://localhost:5984/or_web_ui/_design/viewer/index.html>`_
+
+Tips
+----
+
+To create a textured mesh from a colored point cloud in meshlab:
+http://www.youtube.com/watch?v=JzmODsVQV7w
