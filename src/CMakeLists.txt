@@ -5,8 +5,9 @@ include_directories(SYSTEM ${catkin_INCLUDE_DIRS}
                            ${PCL_INCLUDE_DIRS}
 )
 
-#deal with the objcog module
-ectomodule(object_recognition_reconstruction INSTALL
+# deal with the reconstruction module
+ectomodule(object_recognition_reconstruction DESTINATION ./
+                                             INSTALL
   module.cpp
   #surfel_conversion.cpp
   #surfels.cpp
@@ -17,10 +18,10 @@ ectomodule(object_recognition_reconstruction INSTALL
   PointCloudMesh.cpp
 )
 
-set_target_properties(object_recognition_reconstruction_ectomodule
-      PROPERTIES
-      COMPILE_FLAGS "-Wno-unknown-pragmas -Wno-unused-but-set-variable"
-      )
+#set_target_properties(object_recognition_reconstruction_ectomodule
+#      PROPERTIES
+#      COMPILE_FLAGS "-Wno-unknown-pragmas -Wno-unused-but-set-variable"
+#      )
 
 if (ROS_GROOVY_FOUND)
   find_package(catkin REQUIRED roscpp)

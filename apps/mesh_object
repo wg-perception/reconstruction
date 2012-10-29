@@ -10,7 +10,7 @@ from object_recognition_core.db import tools as dbtools, models
 from ecto_image_pipeline.base import RescaledRegisteredDepth
 import ecto_image_pipeline.base
 import ecto_image_pipeline.conversion
-import object_recognition_reconstruction
+from object_recognition_reconstruction import PointCloudTransform, PointCloudAccumulator
 import ecto_pcl
 from tempfile import NamedTemporaryFile
 from object_recognition_core.db import Documents, ObjectDb
@@ -82,7 +82,7 @@ def simple_mesh_session(dbs, session, args):
     depthTo3d = calib.DepthTo3d('Depth ~> 3D')
     erode = imgproc.Erode('Mask Erosion', kernel=3) #-> 7x7
     rescale_depth = RescaledRegisteredDepth('Depth scaling') #this is for SXGA mode scale handling.
-    point_cloud_transform = object_recognition_reconstruction.PointCloudTransform('Object Space Transform')
+    point_cloud_transform = PointCloudTransform('Object Space Transform')
     point_cloud_converter = ecto_image_pipeline.conversion.MatToPointCloudXYZRGB('To Point Cloud')
     pre_voxel = ecto_pcl.VoxelGrid("Pre Voxel Decimation", leaf_size=0.005)
     to_ecto_pcl = ecto_pcl.PointCloudT2PointCloud('converter', format=ecto_pcl.XYZRGB)
@@ -103,7 +103,7 @@ def simple_mesh_session(dbs, session, args):
       pre_voxel['output'] >> point_cloud_transform['cloud']
     )
 
-    accum = reconstruction.PointCloudAccumulator('accumulator')
+    accum = PointCloudAccumulator('accumulator')
     voxel_grid = ecto_pcl.VoxelGrid("voxel_grid", leaf_size=0.005)
     outlier_removal = ecto_pcl.StatisticalOutlierRemoval('Outlier Removal', mean_k=2, stddev=2)
     source, sink = ecto.EntangledPair(value=accum.inputs.at('view'),

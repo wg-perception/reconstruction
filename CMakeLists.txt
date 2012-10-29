@@ -3,7 +3,8 @@ project(object_recognition_reconstruction)
 
 find_package(catkin REQUIRED ecto ecto_image_pipeline ecto_pcl object_recognition_core)
 find_package(PCL REQUIRED)
-if (${catkin_VERSION} VERSION_GREATER "0.5.28")
+
+if (ROS_GROOVY_OR_ABOVE_FOUND)
 catkin_package(DEPENDS ecto ecto_image_pipeline ecto_pcl object_recognition_core)
 else()
 catkin_stack()
@@ -31,4 +32,3 @@ if(BUILD_TEST)
   enable_testing()
   add_subdirectory(test)
 endif()
-
