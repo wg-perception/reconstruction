@@ -21,10 +21,6 @@ int main(int argc, char *argv[])
 
   ros::init(argc, argv, "model_capture_demo");
 
-  namedWindow("bgr view");
-  namedWindow("depth view");
-  startWindowThread();
-
 #ifdef TEST_RVIZ_RENDERING
   cout << "Start publishing" << endl;
   for (size_t i = 0; i < 100; ++i)

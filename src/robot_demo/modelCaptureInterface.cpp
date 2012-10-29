@@ -8,6 +8,8 @@ using namespace cv;
 using std::cout;
 using std::endl;
 
+//#define SAVE_COLLECTED_DATA
+
 ModelCapturer::ModelCapturer()
 {
   isLoopClosed = false;
@@ -37,29 +39,25 @@ void ModelCapturer::addRGBDFrame(const cv::Mat &bgrImage, const cv::Mat &depth)
 
   static int frameID = 0;
   cout << "pushing frame..." << std::flush;
-  Mat currentPose = onlineCaptureServer.push(bgrImage, depth, frameID);
+  bool isKeyframe;
+  Mat currentPose = onlineCaptureServer.push(bgrImage, depth, frameID, &isKeyframe);
   cout << " done." << endl;
   ++frameID;
 
-  //TODO: move up
-  publishOdometry(currentPose, "RGBDOdometry");
-
-
-
+  if (isKeyframe)
+  {
+    //TODO: move up
+    publishOdometry(currentPose, "RGBDOdometry");
+  }
 
   allBgrImages.push_back(bgrImage);
+#ifdef SAVE_COLLECTED_DATA
   allDepths.push_back(depth);
+#endif
 
-
-/*
-  //TODO: remove, use loop closure detection from the algorithm
-  imshow("bgr view", bgrImage);
-  //TODO: move up
-*/
-  int key = waitKey(3);
-  if (key == 27) //escape
+  isLoopClosed = onlineCaptureServer.isLoopClosed();
+  if (isLoopClosed)
   {
-    isLoopClosed = true;
     createModel();
   }
 }
@@ -69,7 +67,7 @@ void ModelCapturer::createModel()
   CV_Assert(allBgrImages.size() == allDepths.size());
   CV_Assert(!allBgrImages[0].empty());
 
-#if 0
+#ifdef SAVE_COLLECTED_DATA
   cout << "number of collected images:" << allBgrImages.size() << endl;
   for (size_t i = 0; i < allBgrImages.size(); ++i)
   {
