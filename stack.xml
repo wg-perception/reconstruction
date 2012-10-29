@@ -9,12 +9,15 @@
   <copyright>Willow Garage</copyright>
 
   <url>http://ecto.willowgarage.com/recognition</url>
+  <build_depends>assimp</build_depends>
   <build_depends>catkin</build_depends>
   <build_depends>ecto</build_depends>
   <build_depends>ecto_image_pipeline</build_depends>
   <build_depends>ecto_pcl</build_depends>
   <build_depends>object_recognition_core</build_depends>
   <build_depends>opencv2</build_depends>
+
+  <depends>assimp</depends>
   <depends>ecto</depends>
   <depends>ecto_image_pipeline</depends>
   <depends>ecto_pcl</depends>
