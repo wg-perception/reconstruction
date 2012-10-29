@@ -1,7 +1,5 @@
 #include "modelCaptureInterface.hpp"
 #include "rosUtils.hpp"
-//TODO: use splitted code
-#include "../../opencv_candidate/src/rgbd/samples/model_capture/model_capture.hpp"
 #include <opencv2/opencv.hpp>
 
 using namespace cv;
@@ -64,10 +62,10 @@ void ModelCapturer::addRGBDFrame(const cv::Mat &bgrImage, const cv::Mat &depth)
 
 void ModelCapturer::createModel()
 {
-  CV_Assert(allBgrImages.size() == allDepths.size());
   CV_Assert(!allBgrImages[0].empty());
 
 #ifdef SAVE_COLLECTED_DATA
+  CV_Assert(allBgrImages.size() == allDepths.size());
   cout << "number of collected images:" << allBgrImages.size() << endl;
   for (size_t i = 0; i < allBgrImages.size(); ++i)
   {

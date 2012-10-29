@@ -3,7 +3,7 @@
 
 #include <opencv2/core/core.hpp>
 //TODO: use splitted code
-#include "../../opencv_candidate/src/rgbd/samples/model_capture/model_capture.hpp"
+#include "../../../opencv_candidate/src/rgbd/samples/model_capture/model_capture.hpp"
 
 class ModelCapturer
 {

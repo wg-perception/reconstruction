@@ -2,7 +2,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 //TODO: use splitted code
-#include "../../opencv_candidate/src/rgbd/samples/model_capture/model_capture.hpp"
+#include "../../../opencv_candidate/src/rgbd/samples/model_capture/model_capture.hpp"
 
 using namespace cv;
 using std::cout;
