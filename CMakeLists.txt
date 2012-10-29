@@ -1,18 +1,14 @@
 cmake_minimum_required(VERSION 2.8)
 project(object_recognition_reconstruction)
 
-find_package(catkin)
+find_package(catkin REQUIRED ecto ecto_image_pipeline ecto_pcl object_recognition_core)
+find_package(PCL REQUIRED)
 if (${catkin_VERSION} VERSION_GREATER "0.5.28")
-catkin_package()
+catkin_package(DEPENDS ecto ecto_image_pipeline ecto_pcl object_recognition_core)
 else()
 catkin_stack()
-catkin_project(object_recognition_reconstruction)
+catkin_project(object_recognition_reconstruction DEPENDS ecto ecto_image_pipeline ecto_pcl object_recognition_core)
 endif()
-
-find_package(ecto REQUIRED)
-find_package(PCL REQUIRED)
-
-find_package(object_recognition_core REQUIRED)
 
 add_subdirectory(src)
 

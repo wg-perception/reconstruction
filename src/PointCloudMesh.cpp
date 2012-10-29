@@ -143,4 +143,4 @@ namespace object_recognition
 
 using namespace object_recognition::reconstruction;
 
-ECTO_CELL( reconstruction, PointCloudMesh, "PointCloudMesh", "Construct a mesh from a point cloud.");
+ECTO_CELL( object_recognition_reconstruction, PointCloudMesh, "PointCloudMesh", "Construct a mesh from a point cloud.");

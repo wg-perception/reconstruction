@@ -8,7 +8,7 @@
 #ifndef SURFEL_CONVERSTION_H_
 #define SURFEL_CONVERSTION_H_
 
-#include <surfels.h>
+#include "surfels.h"
 
 //#include <visualization_msgs/Marker.h>
 

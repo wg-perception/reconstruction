@@ -82,7 +82,7 @@ def simple_mesh_session(dbs, session, args):
     depthTo3d = calib.DepthTo3d('Depth ~> 3D')
     erode = imgproc.Erode('Mask Erosion', kernel=3) #-> 7x7
     rescale_depth = RescaledRegisteredDepth('Depth scaling') #this is for SXGA mode scale handling.
-    point_cloud_transform = reconstruction.PointCloudTransform('Object Space Transform')
+    point_cloud_transform = object_recognition_reconstruction.PointCloudTransform('Object Space Transform')
     point_cloud_converter = ecto_image_pipeline.conversion.MatToPointCloudXYZRGB('To Point Cloud')
     pre_voxel = ecto_pcl.VoxelGrid("Pre Voxel Decimation", leaf_size=0.005)
     to_ecto_pcl = ecto_pcl.PointCloudT2PointCloud('converter', format=ecto_pcl.XYZRGB)

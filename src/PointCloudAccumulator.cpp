@@ -107,5 +107,5 @@ namespace object_recognition
 
 using namespace object_recognition::reconstruction;
 
-ECTO_CELL( reconstruction, PointCloudAccumulator, "PointCloudAccumulator",
+ECTO_CELL( object_recognition_reconstruction, PointCloudAccumulator, "PointCloudAccumulator",
           "Accumulate a set of XYZ style point clouds into a single cloud.");

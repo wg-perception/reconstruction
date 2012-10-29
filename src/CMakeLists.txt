@@ -1,17 +1,8 @@
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-
-find_package(ecto_pcl REQUIRED)
 find_package(Eigen REQUIRED)
-find_package(ecto_image_pipeline REQUIRED)
-find_package(object_recognition_core REQUIRED)
-find_package(PCL REQUIRED)
 
-include_directories(SYSTEM
-                    ${ecto_pcl_INCLUDE_DIRS}
-                    ${EIGEN_INCLUDE_DIRS}
-                    ${ecto_image_pipeline_INCLUDE_DIRS}
-                    ${object_recognition_core_INCLUDE_DIRS}
-                    ${PCL_INCLUDE_DIRS}
+include_directories(SYSTEM ${catkin_INCLUDE_DIRS}
+                           ${EIGEN_INCLUDE_DIRS}
+                           ${PCL_INCLUDE_DIRS}
 )
 
 #deal with the objcog module
@@ -24,7 +15,7 @@ ectomodule(object_recognition_reconstruction INSTALL
   PointCloudTransform.cpp
   PointCloudAccumulator.cpp
   PointCloudMesh.cpp
-  )
+)
 
 set_target_properties(object_recognition_reconstruction_ectomodule
       PROPERTIES
@@ -113,3 +104,5 @@ if (USE_ON_ROBOT)
   )
   set_target_properties(robot_demo PROPERTIES COMPILE_FLAGS "-fopenmp" LINK_FLAGS "-fopenmp")
 endif()
+
+add_subdirectory(renderer)

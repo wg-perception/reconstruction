@@ -105,7 +105,7 @@ namespace object_recognition
 using namespace object_recognition::reconstruction;
 
 ECTO_CELL(
-    reconstruction,
+    object_recognition_reconstruction,
     PointCloudTransform,
     "PointCloudTransform",
     "Transform an pcl point cloud into object coordinate system, and set the sensor positino and orientation in the output cloud.");
