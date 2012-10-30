@@ -52,6 +52,7 @@ if (USE_ON_ROBOT)
   include_directories(/opt/ros/fuerte/stacks/geometry/tf/include/
                       /opt/ros/fuerte/stacks/bullet/include/
                       /opt/ros/fuerte/stacks/geometry/tf/msg_gen/cpp/include/
+                      /opt/ros/fuerte/stacks/geometry/tf/srv_gen/cpp/include/
   )
 
   include_directories(/opt/ros/fuerte/stacks/vision_opencv/cv_bridge/include/
