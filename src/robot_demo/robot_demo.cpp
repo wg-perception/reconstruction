@@ -10,10 +10,13 @@ using std::endl;
 int main(int argc, char *argv[])
 {
   //TODO: use remapping
-//  const string bgrImageTopic = "/head_camera/rgb/image_color";
-//  const string depthTopic = "/head_camera/depth_registered/image";
+#ifdef USE_ON_PR2
   const string bgrImageTopic = "/head_mount_kinect/rgb/image_color";
   const string depthTopic = "/head_mount_kinect/depth/image";
+#else
+  const string bgrImageTopic = "/head_camera/rgb/image_color";
+  const string depthTopic = "/head_camera/depth_registered/image";
+#endif
 //  const uint32_t queueSize = 15; //1
   const uint32_t queueSize = 2; //1
 

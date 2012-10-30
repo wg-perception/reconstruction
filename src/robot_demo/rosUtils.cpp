@@ -69,6 +69,13 @@ void publishOdometry(const cv::Mat &poseMat, const std::string &topicName)
 //  const string frame = "odom_combined";
 //  cosnt string frame = "head_mount_kinect_rgb_optical_frame";
   const string rgbdOdometryFrame = "odom_rgbd";
+#ifdef USE_ON_PR2
+  const string rosOdometryFrame = "/odom_combined";
+  const string kinectFrame = "/head_mount_kinect_rgb_optical_frame";
+#else
+  const string rosOdometryFrame = "/odom";
+  const string kinectFrame = "/head_camera_rgb_optical_frame";
+#endif
 
   //TODO: move up
   ros::Rate r(100.0);
@@ -81,8 +88,8 @@ void publishOdometry(const cv::Mat &poseMat, const std::string &topicName)
       tf::TransformListener listener;
       //TODO: move up
       ros::spinOnce();
-      listener.waitForTransform("/odom_combined", "/head_mount_kinect_rgb_optical_frame", current_time, ros::Duration(10.0));
-      listener.lookupTransform("/odom_combined", "/head_mount_kinect_rgb_optical_frame", ros::Time(0), transform);
+      listener.waitForTransform(rosOdometryFrame, kinectFrame, current_time, ros::Duration(10.0));
+      listener.lookupTransform(rosOdometryFrame, kinectFrame, ros::Time(0), transform);
       transform.child_frame_id_ = rgbdOdometryFrame;
       isTransformInitialized = true;
   }
