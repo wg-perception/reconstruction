@@ -37,11 +37,6 @@
 
 #include <GL/glut.h>
 
-// assimp include files. These three are usually needed.
-#include <assimp/cimport.h>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
 #include "display.h"
 
 // the global Assimp scene object
