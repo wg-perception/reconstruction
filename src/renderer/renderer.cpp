@@ -45,7 +45,6 @@
 #include "display.h"
 
 // the global Assimp scene object
-Display display;
 GLuint scene_list = 0;
 
 // current rotation angle
@@ -89,14 +88,14 @@ display_function(void)
 
   glMatrixMode (GL_MODELVIEW);
   glLoadIdentity();
-  gluLookAt(0.f, 0.f, 3.f, 0.f, 0.f, -5.f, 0.f, 1.f, 0.f);
+  gluLookAt(0.f, 0.f, 2.f, 0.f, 0.f, -5.f, 0.f, 1.f, 0.f);
 
   // rotate it around the y axis
   glRotatef(angle, 0.f, 1.f, 0.f);
 
   // scale the whole asset to fit into our view frustum
   aiVector3D scene_min, scene_max, scene_center;
-  display.model().get_bounding_box(&scene_min, &scene_max);
+  Display::model().get_bounding_box(&scene_min, &scene_max);
   scene_center.x = (scene_min.x + scene_max.x) / 2.0f;
   scene_center.y = (scene_min.y + scene_max.y) / 2.0f;
   scene_center.z = (scene_min.z + scene_max.z) / 2.0f;
@@ -119,13 +118,15 @@ display_function(void)
     // now begin at the root node of the imported data and traverse
     // the scenegraph by multiplying subsequent local transforms
     // together on GL's matrix stack.
-    display.model().Draw();
+    Display::model().Draw();
     glEndList();
   }
 
   glCallList(scene_list);
 
   glutSwapBuffers();
+
+  //Display::save_to_disk();
 
   do_motion();
 }
@@ -136,7 +137,10 @@ main(int argc, char **argv)
 {
   struct aiLogStream stream;
 
-  glutInitWindowSize(900, 600);
+  // Define the display
+  size_t width = 600, height = 600;
+
+  glutInitWindowSize(width, height);
   glutInitWindowPosition(100, 100);
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
   glutInit(&argc, argv);
@@ -157,7 +161,9 @@ main(int argc, char **argv)
   aiAttachLogStream(&stream);
 
   // the model name can be specified on the command line.
-  display.load_model(argv[1]);
+  Display display;
+  Display::load_model(argv[1]);
+  Display::set_parameters(width, height);
 
   glClearColor(0.1f, 0.1f, 0.1f, 1.f);
 

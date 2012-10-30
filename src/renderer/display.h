@@ -36,6 +36,8 @@
 #ifndef CAMERA_H_
 #define CAMERA_H_
 
+#include <boost/format.hpp>
+
 #include <eigen3/Eigen/Eigen>
 
 #include <GL/gl.h>
@@ -53,30 +55,15 @@ class Display
 public:
   Display()
       :
-        image_width_(900),
-        image_height_(600),
         angle_(0)
   {
-    near_ = 0.1;
-    far_ = 5.0;
-
-    double f = focal_length_, w = image_width_, h = image_height_, far = far_, near = near_;
-
-    Matrix4d K;
-    K << f, 0, w / 2, 0, 0, f, h / 2, 0, 0, 0, 1, 0, 0, 0, 0, 1;
-
-    matrix_ << 2 * K(0, 0) / w, -2 * K(0, 1) / w, (w - 2 * K(0, 2)) / w, 0, 0, -2 * K(1, 1) / h, (h - 2 * K(1, 2)) / h, 0, 0, 0, (-far
-        - near)
-                                                                                                                                 / (far - near), -2
-        * far * near
-                                                                                                                                                 / (far - near), 0, 0, -1, 0;
   }
 
-  void
-  load_model(const char * file_name)
-  {
-    model_.LoadModel(file_name);
-  }
+  static void
+  load_model(const char * file_name);
+
+  static void
+  set_parameters(size_t width, size_t height);
 
   void
   display(void)
@@ -130,38 +117,11 @@ public:
     do_motion();
   }
 
-  void
-  save_to_disk()
-  {
-    cv::Mat image, depth, mask;
+  static void
+  save_to_disk();
 
-    image.create(cv::Size(image_width_, image_height_), CV_8UC3);
-    depth.create(cv::Size(image_width_, image_height_), CV_32FC1);
-    mask.create(cv::Size(image_width_, image_height_), CV_8UC1);
-    glFlush();
-
-    glReadPixels(0, 0, image_width_, image_height_, GL_DEPTH_COMPONENT, GL_FLOAT, depth.ptr());
-    glReadPixels(0, 0, image_width_, image_height_, GL_BGR, GL_UNSIGNED_BYTE, image.ptr());
-
-    float zNear = near_, zFar = far_;
-    cv::Mat_<float>::iterator it = depth.begin<float>(), end = depth.end<float>();
-    while (it != end)
-    {
-      //need to undo the depth buffer mapping
-      //http://olivers.posterous.com/linear-depth-in-glsl-for-real
-      *it = 2 * zFar * zNear / (zFar + zNear - (zFar - zNear) * (2 * (*it) - 1));
-      ++it;
-    }
-    cv::Mat m(depth < (zFar * 0.99));
-    m.copyTo(mask);
-
-    cv::imwrite("depth.png", depth);
-    cv::imwrite("image.png", image);
-    cv::imwrite("mask.png", mask);
-  }
-
-  const Model &
-  model() const
+  static const Model &
+  model()
   {
     return model_;
   }
@@ -178,12 +138,12 @@ private:
     glutPostRedisplay();
   }
 
-  unsigned image_width_, image_height_;
-  double focal_length_, near_, far_;
+  static unsigned int image_width_, image_height_;
+  static double focal_length_, near_, far_;
   float angle_;
 
-  Matrix4d matrix_;
-  Model model_;
+  static Matrix4d matrix_;
+  static Model model_;
   GLuint scene_list_;
   aiVector3D scene_min_, scene_max_, scene_center_;
 };

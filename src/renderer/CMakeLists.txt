@@ -11,16 +11,27 @@ IF ( NOT GLUT_FOUND )
 	ENDIF ( MSVC )
 ENDIF ( NOT GLUT_FOUND )
 
-INCLUDE_DIRECTORIES(
-	${Assimp_SOURCE_DIR}/include
-	${Assimp_SOURCE_DIR}/code
-	${OPENGL_INCLUDE_DIR}
-	${GLUT_INCLUDE_DIR}
-)
+find_package(PkgConfig REQUIRED)
+find_package(ASSIMP QUIET)
+if (NOT ASSIMP_FOUND)
+  pkg_check_modules(ASSIMP assimp)
+endif()
+if (NOT ASSIMP_FOUND)
+  message(WARNING "ASsimp not found, not building synthetic views")
+endif()
+if( ${ASSIMP_VERSION} STRGREATER "2.0.0" )
+  set(IS_ASSIMP3 1)
+  add_definitions(-DIS_ASSIMP3)
+  message(STATUS "Found assimp v3")
+else()
+  message(STATUS "Found assimp v2")
+endif()
 
-LINK_DIRECTORIES( 
-	${Assimp_BINARY_DIR} 
-	${Assimp_BINARY_DIR}/lib 
+include_directories(${ASSIMP_INCLUDE_DIRS})
+link_directories(${ASSIMP_LIBRARY_DIRS})
+
+INCLUDE_DIRECTORIES(SYSTEM ${GLUT_INCLUDE_DIR}
+                           ${OPENGL_INCLUDE_DIR}
 )
 
 ADD_EXECUTABLE( assimp_simpleogl display.cpp
@@ -33,6 +44,6 @@ SET_PROPERTY(TARGET assimp_simpleogl PROPERTY DEBUG_POSTFIX ${ASSIMP_DEBUG_POSTF
 TARGET_LINK_LIBRARIES( assimp_simpleogl assimp
                                         ${OpenCV_LIBRARIES}
                                         ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} IL ILU ILUT freeimage)
-SET_TARGET_PROPERTIES( assimp_simpleogl PROPERTIES
-	OUTPUT_NAME assimp_simpleogl
+SET_TARGET_PROPERTIES(assimp_simpleogl PROPERTIES
+                                       OUTPUT_NAME assimp_simpleogl
 )
