@@ -23,14 +23,16 @@ LINK_DIRECTORIES(
 	${Assimp_BINARY_DIR}/lib 
 )
 
-ADD_EXECUTABLE( assimp_simpleogl
-	renderer.cpp
-        Model.cpp
+ADD_EXECUTABLE( assimp_simpleogl display.cpp
+                                 renderer.cpp
+                                 Model.cpp
 )
 
 SET_PROPERTY(TARGET assimp_simpleogl PROPERTY DEBUG_POSTFIX ${ASSIMP_DEBUG_POSTFIX})
 
-TARGET_LINK_LIBRARIES( assimp_simpleogl assimp ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} IL ILU ILUT freeimage)
+TARGET_LINK_LIBRARIES( assimp_simpleogl assimp
+                                        ${OpenCV_LIBRARIES}
+                                        ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} IL ILU ILUT freeimage)
 SET_TARGET_PROPERTIES( assimp_simpleogl PROPERTIES
 	OUTPUT_NAME assimp_simpleogl
 )

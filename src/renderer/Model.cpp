@@ -141,7 +141,7 @@ Model::recursiveTextureLoad(const struct aiScene *sc, const aiNode* nd)
 }
 
 void
-Model::get_bounding_box_for_node(const aiNode* nd, aiVector3D* min, aiVector3D* max, aiMatrix4x4* trafo)
+Model::get_bounding_box_for_node(const aiNode* nd, aiVector3D* min, aiVector3D* max, aiMatrix4x4* trafo) const
 {
   aiMatrix4x4 prev; // Use struct keyword to show you want struct version of this, not normal typedef?
   unsigned int n = 0, t;
@@ -174,7 +174,7 @@ Model::get_bounding_box_for_node(const aiNode* nd, aiVector3D* min, aiVector3D* 
 }
 
 void
-Model::get_bounding_box(aiVector3D* min, aiVector3D* max)
+Model::get_bounding_box(aiVector3D* min, aiVector3D* max) const
 {
   aiMatrix4x4 trafo;
   aiIdentityMatrix4(&trafo);
@@ -185,7 +185,7 @@ Model::get_bounding_box(aiVector3D* min, aiVector3D* max)
 }
 
 void
-Model::recursive_render(const struct aiScene *sc, const aiNode* nd)
+Model::recursive_render(const struct aiScene *sc, const aiNode* nd) const
 {
   int i;
   unsigned int n = 0, t;
@@ -263,7 +263,7 @@ Model::recursive_render(const struct aiScene *sc, const aiNode* nd)
 }
 
 void
-Model::Draw()
+Model::Draw() const
 {
   recursive_render(scene, scene->mRootNode);
 }

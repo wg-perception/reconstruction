@@ -42,12 +42,11 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "Model.h"
+#include "display.h"
 
 // the global Assimp scene object
-Model model;
+Display display;
 GLuint scene_list = 0;
-aiVector3D scene_min, scene_max, scene_center;
 
 // current rotation angle
 static float angle = 0.f;
@@ -82,7 +81,7 @@ do_motion(void)
 
 // ----------------------------------------------------------------------------
 void
-display(void)
+display_function(void)
 {
   float tmp;
 
@@ -96,7 +95,8 @@ display(void)
   glRotatef(angle, 0.f, 1.f, 0.f);
 
   // scale the whole asset to fit into our view frustum
-  model.get_bounding_box(&scene_min, &scene_max);
+  aiVector3D scene_min, scene_max, scene_center;
+  display.model().get_bounding_box(&scene_min, &scene_max);
   scene_center.x = (scene_min.x + scene_max.x) / 2.0f;
   scene_center.y = (scene_min.y + scene_max.y) / 2.0f;
   scene_center.z = (scene_min.z + scene_max.z) / 2.0f;
@@ -119,7 +119,7 @@ display(void)
     // now begin at the root node of the imported data and traverse
     // the scenegraph by multiplying subsequent local transforms
     // together on GL's matrix stack.
-    model.Draw();
+    display.model().Draw();
     glEndList();
   }
 
@@ -142,7 +142,7 @@ main(int argc, char **argv)
   glutInit(&argc, argv);
 
   glutCreateWindow("Assimp - Very simple OpenGL sample");
-  glutDisplayFunc(display);
+  glutDisplayFunc(display_function);
   glutReshapeFunc(reshape);
 
   // get a handle to the predefined STDOUT log stream and attach
@@ -157,7 +157,7 @@ main(int argc, char **argv)
   aiAttachLogStream(&stream);
 
   // the model name can be specified on the command line.
-  model.LoadModel(argv[1]);
+  display.load_model(argv[1]);
 
   glClearColor(0.1f, 0.1f, 0.1f, 1.f);
 

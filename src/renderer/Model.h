@@ -58,10 +58,10 @@ private:
   void
   recursiveTextureLoad(const struct aiScene *sc, const struct aiNode* nd);
   void
-  recursive_render(const struct aiScene *sc, const struct aiNode* nd);
+  recursive_render(const struct aiScene *sc, const struct aiNode* nd) const;
 
   void
-  get_bounding_box_for_node(const aiNode* nd, aiVector3D* min, aiVector3D* max, aiMatrix4x4* trafo);
+  get_bounding_box_for_node(const aiNode* nd, aiVector3D* min, aiVector3D* max, aiMatrix4x4* trafo) const;
 public:
   Model();
   ~Model();
@@ -69,10 +69,10 @@ public:
   void
   LoadModel(const char* fileName);
   void
-  Draw();
+  Draw() const;
 
   void
-  get_bounding_box(aiVector3D* min, aiVector3D* max);
+  get_bounding_box(aiVector3D* min, aiVector3D* max) const;
 };
 
 void
