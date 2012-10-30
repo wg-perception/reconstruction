@@ -42,9 +42,6 @@
 // the global Assimp scene object
 GLuint scene_list = 0;
 
-// current rotation angle
-static float angle = 0.f;
-
 #define aisgl_min(x,y) (x<y?x:y)
 #define aisgl_max(x,y) (y>x?y:x)
 
@@ -60,6 +57,15 @@ reshape(int width, int height)
   glViewport(0, 0, width, height);
 }
 
+void
+normalize_vector(float & x, float&y, float&z)
+{
+  float norm = std::sqrt(x * x + y * y + z * z);
+  x /= norm;
+  y /= norm;
+  z /= norm;
+}
+
 // ----------------------------------------------------------------------------
 void
 do_motion(void)
@@ -67,7 +73,7 @@ do_motion(void)
   static GLint prev_time = 0;
 
   int time = glutGet(GLUT_ELAPSED_TIME);
-  angle += (time - prev_time) * 0.01;
+  //angle += (time - prev_time) * 0.01;
   prev_time = time;
 
   glutPostRedisplay();
@@ -83,10 +89,60 @@ display_function(void)
 
   glMatrixMode (GL_MODELVIEW);
   glLoadIdentity();
-  gluLookAt(0.f, 0.f, 2.f, 0.f, 0.f, -5.f, 0.f, 1.f, 0.f);
+  //gluLookAt(0.f, 0.f, 2.f, 0.f, 0.f, -5.f, 0.f, 1.f, 0.f);
 
   // rotate it around the y axis
-  glRotatef(angle, 0.f, 1.f, 0.f);
+  //glRotatef(angle, 0.f, 1.f, 0.f);
+
+  // Figure a view point on the sphere
+  unsigned int n_points = 1000;
+  unsigned int n_rotations = 12;
+  static unsigned int nx = sqrt(n_points / n_rotations), ny = nx;
+  static unsigned int X = 0;
+  static unsigned int Y = 0;
+  static unsigned int angle = 0;
+
+  ++angle;
+  if (angle >= n_rotations)
+  {
+    angle = 0;
+    ++Y;
+    if (Y >= ny)
+    {
+      Y = 0;
+      ++X;
+      if (X >= nx)
+        // Ugly hack to
+        throw("something");
+    }
+  }
+  float lon = 2 * 3.14159 * ((X + 0.5) / nx);
+  float lat = asin((2 * (Y + 0.5) / ny - 1));
+  std::cout << (angle + Y * ny + n_rotations * ny * X) / float(n_rotations * ny * nx) * 100. << std::endl;
+
+  unsigned int radius = 2;
+  float x = radius * cos(lon) * sin(lat);
+  float y = radius * sin(lon) * sin(lat);
+  float z = radius * cos(lat);
+  // Figure out the up vector
+  float x_up = radius * cos(lon) * sin(lat - 1e-5) - x;
+  float y_up = radius * sin(lon) * sin(lat - 1e-5) - y;
+  float z_up = radius * cos(lat - 1e-5) - z;
+  normalize_vector(x_up, y_up, z_up);
+
+  // Figure out the third vecto of the basis
+  float x_right = -y_up * z + z_up * y;
+  float y_right = x_up * z - z_up * x;
+  float z_right = -x_up * y + y_up * x;
+  normalize_vector(x_right, y_right, z_right);
+
+  // Rotate the up vector in that basis
+  float angle_rad = angle * 2 * 3.14159 / (n_rotations + 1);
+  float x_new_up = x_up * cos(angle) + x_right * sin(angle);
+  float y_new_up = y_up * cos(angle) + y_right * sin(angle);
+  float z_new_up = z_up * cos(angle) + z_right * sin(angle);
+
+  gluLookAt(x, y, z, 0.f, 0.f, 0.f, x_new_up, y_new_up, z_new_up);
 
   // scale the whole asset to fit into our view frustum
   aiVector3D scene_min, scene_max, scene_center;
@@ -121,7 +177,7 @@ display_function(void)
 
   glutSwapBuffers();
 
-  //Display::save_to_disk();
+  Display::save_to_disk();
 
   do_motion();
 }
@@ -177,7 +233,13 @@ main(int argc, char **argv)
   glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
 
   glutGet(GLUT_ELAPSED_TIME);
-  glutMainLoop();
+  try
+  {
+    glutMainLoop();
+  } catch (const char * msg)
+  {
+
+  }
 
   // We added a log stream to the library, it's our job to disable it
   // again. This will definitely release the last resources allocated
