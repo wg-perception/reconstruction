@@ -36,7 +36,7 @@
 #include "display.h"
 
 unsigned int Display::image_width_ = 0, Display::image_height_ = 0;
-double Display::focal_length_ = 0, Display::near_ = 0, Display::far_ = 0;
+double Display::focal_length_x_ = 0, Display::focal_length_y_ = 0, Display::near_ = 0, Display::far_ = 0;
 
 Matrix4d Display::matrix_;
 Model Display::model_;
@@ -48,24 +48,28 @@ Display::load_model(const char * file_name)
 }
 
 void
-Display::set_parameters(size_t width, size_t height)
+Display::set_parameters(size_t width, size_t height, double focal_length_x, double focal_length_y, double near,
+                        double far)
 {
   image_width_ = width;
   image_height_ = height;
 
-  near_ = 0.1;
-  far_ = 5.0;
+  focal_length_x_ = focal_length_x;
+  focal_length_y_ = focal_length_y;
 
-  double f = focal_length_, w = image_width_, h = image_height_, far = far_, near = near_;
+  near_ = near;
+  far_ = far;
 
-  Matrix4d K;
-  K << f, 0, w / 2, 0, 0, f, h / 2, 0, 0, 0, 1, 0, 0, 0, 0, 1;
+  /*  double f = focal_length_, w = image_width_, h = image_height_;
 
-  matrix_ << 2 * K(0, 0) / w, -2 * K(0, 1) / w, (w - 2 * K(0, 2)) / w, 0, 0, -2 * K(1, 1) / h, (h - 2 * K(1, 2)) / h, 0, 0, 0, (-far
-      - near)
-                                                                                                                               / (far - near), -2
-      * far * near
-                                                                                                                                               / (far - near), 0, 0, -1, 0;
+   Matrix4d K;
+   K << f, 0, w / 2, 0, 0, f, h / 2, 0, 0, 0, 1, 0, 0, 0, 0, 1;
+
+   matrix_ << 2 * K(0, 0) / w, -2 * K(0, 1) / w, (w - 2 * K(0, 2)) / w, 0, 0, -2 * K(1, 1) / h, (h - 2 * K(1, 2)) / h, 0, 0, 0, (-far
+   - near)
+   / (far - near), -2
+   * far * near
+   / (far - near), 0, 0, -1, 0;*/
 }
 
 void
@@ -83,6 +87,7 @@ Display::save_to_disk()
 
   float zNear = near_, zFar = far_;
   cv::Mat_<float>::iterator it = depth.begin<float>(), end = depth.end<float>();
+  float max_allowed_z = zFar * 0.99;
   while (it != end)
   {
     //need to undo the depth buffer mapping
@@ -90,11 +95,77 @@ Display::save_to_disk()
     *it = 2 * zFar * zNear / (zFar + zNear - (zFar - zNear) * (2 * (*it) - 1));
     ++it;
   }
-  cv::Mat m(depth < (zFar * 0.99));
+  cv::Mat m(depth < max_allowed_z);
   m.copyTo(mask);
+  depth.setTo(0, 255 - mask);
 
   static size_t index = 0;
-  cv::imwrite(boost::str(boost::format("depth_%05d.png") % (index)), depth);
+  cv::Mat depth_scale(cv::Size(image_width_, image_height_), CV_16UC1);
+  depth.convertTo(depth_scale, CV_16UC1, 1e3);
+
+  cv::Mat depth_vis;
+  depth.convertTo(depth_vis, CV_8UC1, 400);
+
+  /*float min_x = 10000, max_x = 0;
+  float min_y = 10000, max_y = 0;
+  float min_z = 10000, max_z = 0;
+
+  // From http://nehe.gamedev.net/article/using_gluunproject/16013/
+  GLint viewport[4];
+  GLdouble modelview[16];
+  GLdouble projection[16];
+  GLfloat winX, winY, winZ;
+  GLdouble posX, posY, posZ;
+
+  glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+  glGetDoublev(GL_PROJECTION_MATRIX, projection);
+  glGetIntegerv(GL_VIEWPORT, viewport);
+
+  for(unsigned int j=0;j<4;++j)
+    std::cout << viewport[j] << " ";
+  std::cout << std::endl;
+  for(unsigned int i=0;i<16;++i) {
+    modelview[i] = 0;
+    std::cout << modelview[i] << " ";
+  }
+  modelview[0] = 1;
+  modelview[5] = 1;
+  modelview[10] = 1;
+  modelview[15] = 1;
+  std::cout << std::endl;
+  for(unsigned int j=0;j<16;++j)
+    std::cout << projection[j] << " ";
+  std::cout << std::endl;
+
+  it = depth.begin<float>();
+  for (unsigned int y = 0; y < image_height_; ++y)
+    for (unsigned int x = 0; x < image_width_; ++x, ++it)
+    {
+      if ((*it >= max_allowed_z) || (*it == 0))
+        continue;
+      winX = (float) x;
+      winY = (float) viewport[3] - (float) y;
+      glReadPixels(x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
+
+      gluUnProject(winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
+      std::cout << posZ << " " << (*it) << std::endl;
+      min_x = std::min(min_x, float(posX));
+      max_x = std::max(max_x, float(posX));
+      min_y = std::min(min_y, float(posY));
+      max_y = std::max(max_y, float(posY));
+      min_z = std::min(min_z, float(posZ));
+      max_z = std::max(max_z, float(posZ));
+    }
+  std::cout << min_x << " - " << max_x << " ---- " << min_y << " - " << max_y << " ---- " << min_z << " - " << max_z
+            << std::endl;
+
+  cv::namedWindow("toto");
+  cv::namedWindow("toto2");
+  cv::imshow("toto", depth_vis);
+  cv::imshow("toto2", mask);
+  cv::waitKey(0);*/
+
+  cv::imwrite(boost::str(boost::format("depth_%05d.png") % (index)), depth_scale);
   cv::imwrite(boost::str(boost::format("image_%05d.png") % (index)), image);
   cv::imwrite(boost::str(boost::format("mask_%05d.png") % (index)), mask);
   ++index;

@@ -45,15 +45,26 @@ GLuint scene_list = 0;
 #define aisgl_min(x,y) (x<y?x:y)
 #define aisgl_max(x,y) (y>x?y:x)
 
+double PI = 3.14159;
+
 // ----------------------------------------------------------------------------
 void
 reshape(int width, int height)
 {
-  const double aspectRatio = (float) width / height, fieldOfView = 45.0;
-
   glMatrixMode (GL_PROJECTION);
   glLoadIdentity();
-  gluPerspective(fieldOfView, aspectRatio, 1.0, 1000.0); /* Znear and Zfar */
+
+  double fx = Display::focal_length_x();
+  double fy = Display::focal_length_y();
+  double fovy = 2 * atan(0.5 * height / fy) * 180 / PI;
+  double aspect = (width * fy) / (height * fx);
+
+  // define the near and far clipping planes
+  double near = Display::near();
+  double far = Display::far();
+
+  // set perspective
+  gluPerspective(fovy, aspect, near, far);
   glViewport(0, 0, width, height);
 }
 
@@ -65,20 +76,6 @@ normalize_vector(float & x, float&y, float&z)
   y /= norm;
   z /= norm;
 }
-
-// ----------------------------------------------------------------------------
-void
-do_motion(void)
-{
-  static GLint prev_time = 0;
-
-  int time = glutGet(GLUT_ELAPSED_TIME);
-  //angle += (time - prev_time) * 0.01;
-  prev_time = time;
-
-  glutPostRedisplay();
-}
-
 // ----------------------------------------------------------------------------
 void
 display_function(void)
@@ -95,32 +92,40 @@ display_function(void)
   //glRotatef(angle, 0.f, 1.f, 0.f);
 
   // Figure a view point on the sphere
-  unsigned int n_points = 1000;
-  unsigned int n_rotations = 12;
-  static unsigned int nx = sqrt(n_points / n_rotations), ny = nx;
+  static unsigned int nx = 15, ny = 15;
   static unsigned int X = 0;
   static unsigned int Y = 0;
-  static unsigned int angle = 0;
+  // Angle in degrees
+  static int angle_min = -80, angle_max = 80, angle_step = 40, angle = angle_min;
+  static float radius_min = 0.4, radius_max = 0.8, radius_step = 0.2, radius = radius_min;
 
-  ++angle;
-  if (angle >= n_rotations)
+  static unsigned int index = 0;
+  angle += angle_step;
+  if (angle > angle_max)
   {
-    angle = 0;
-    ++Y;
-    if (Y >= ny)
+    angle = angle_min;
+    radius += radius_step;
+    if (radius > radius_max)
     {
-      Y = 0;
-      ++X;
-      if (X >= nx)
-        // Ugly hack to
-        throw("something");
+      radius = radius_min;
+      ++Y;
+      if (Y >= ny/2)
+      {
+        Y = 0;
+        ++X;
+        if (X >= nx)
+          // Ugly hack to exit glutMainLoop
+          throw("something");
+      }
     }
   }
-  float lon = 2 * 3.14159 * ((X + 0.5) / nx);
+  float lon = 2 * PI * ((X + 0.5) / nx);
   float lat = asin((2 * (Y + 0.5) / ny - 1));
-  std::cout << (angle + Y * ny + n_rotations * ny * X) / float(n_rotations * ny * nx) * 100. << std::endl;
+  unsigned int n_templates = ((angle_max - angle_min) / angle_step + 1) * nx * ny
+                             * ((radius_max - radius_min) / radius_step + 1);
+  std::cout << n_templates << " templates: " << float(index * 100) / float(n_templates) << std::endl;
+  std::cout << angle << " " << lon << " " << lat << " " << radius << std::endl;
 
-  unsigned int radius = 2;
   float x = radius * cos(lon) * sin(lat);
   float y = radius * sin(lon) * sin(lat);
   float z = radius * cos(lat);
@@ -130,17 +135,17 @@ display_function(void)
   float z_up = radius * cos(lat - 1e-5) - z;
   normalize_vector(x_up, y_up, z_up);
 
-  // Figure out the third vecto of the basis
+  // Figure out the third vector of the basis
   float x_right = -y_up * z + z_up * y;
   float y_right = x_up * z - z_up * x;
   float z_right = -x_up * y + y_up * x;
   normalize_vector(x_right, y_right, z_right);
 
   // Rotate the up vector in that basis
-  float angle_rad = angle * 2 * 3.14159 / (n_rotations + 1);
-  float x_new_up = x_up * cos(angle) + x_right * sin(angle);
-  float y_new_up = y_up * cos(angle) + y_right * sin(angle);
-  float z_new_up = z_up * cos(angle) + z_right * sin(angle);
+  float angle_rad = angle * PI / 180.;
+  float x_new_up = x_up * cos(angle_rad) + x_right * sin(angle_rad);
+  float y_new_up = y_up * cos(angle_rad) + y_right * sin(angle_rad);
+  float z_new_up = z_up * cos(angle_rad) + z_right * sin(angle_rad);
 
   gluLookAt(x, y, z, 0.f, 0.f, 0.f, x_new_up, y_new_up, z_new_up);
 
@@ -151,11 +156,11 @@ display_function(void)
   scene_center.y = (scene_min.y + scene_max.y) / 2.0f;
   scene_center.z = (scene_min.z + scene_max.z) / 2.0f;
 
-  tmp = scene_max.x - scene_min.x;
-  tmp = aisgl_max(scene_max.y - scene_min.y,tmp);
-  tmp = aisgl_max(scene_max.z - scene_min.z,tmp);
-  tmp = 1.f / tmp;
-  glScalef(tmp, tmp, tmp);
+  /*tmp = scene_max.x - scene_min.x;
+   tmp = aisgl_max(scene_max.y - scene_min.y,tmp);
+   tmp = aisgl_max(scene_max.z - scene_min.z,tmp);
+   tmp = 1.f / tmp;
+   glScalef(tmp, tmp, tmp);*/
 
   // center the model
   glTranslatef(-scene_center.x, -scene_center.y, -scene_center.z);
@@ -177,9 +182,11 @@ display_function(void)
 
   glutSwapBuffers();
 
-  Display::save_to_disk();
+  if (index > 0)
+    Display::save_to_disk();
 
-  do_motion();
+  glutPostRedisplay();
+  ++index;
 }
 
 // ----------------------------------------------------------------------------
@@ -189,7 +196,14 @@ main(int argc, char **argv)
   struct aiLogStream stream;
 
   // Define the display
-  size_t width = 600, height = 600;
+  size_t width = 640, height = 480;
+  double near = 0.1, far = 1000;
+  double focal_length_x = 525, focal_length_y = 525;
+
+  // the model name can be specified on the command line.
+  Display display;
+  Display::load_model(argv[1]);
+  Display::set_parameters(width, height, focal_length_x, focal_length_y, near, far);
 
   glutInitWindowSize(width, height);
   glutInitWindowPosition(100, 100);
@@ -210,11 +224,6 @@ main(int argc, char **argv)
   // log messages to assimp_log.txt
   stream = aiGetPredefinedLogStream(aiDefaultLogStream_FILE, "assimp_log.txt");
   aiAttachLogStream(&stream);
-
-  // the model name can be specified on the command line.
-  Display display;
-  Display::load_model(argv[1]);
-  Display::set_parameters(width, height);
 
   glClearColor(0.1f, 0.1f, 0.1f, 1.f);
 

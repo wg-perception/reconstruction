@@ -63,7 +63,7 @@ public:
   load_model(const char * file_name);
 
   static void
-  set_parameters(size_t width, size_t height);
+  set_parameters(size_t width, size_t height, double focal_length_x, double focal_length_y, double near, double far);
 
   void
   display(void)
@@ -125,6 +125,30 @@ public:
   {
     return model_;
   }
+
+  static const double
+  near()
+  {
+    return near_;
+  }
+
+  static const double
+  far()
+  {
+    return far_;
+  }
+
+  static const double
+  focal_length_x()
+  {
+    return focal_length_x_;
+  }
+
+  static const double
+  focal_length_y()
+  {
+    return focal_length_y_;
+  }
 private:
   void
   do_motion(void)
@@ -139,7 +163,7 @@ private:
   }
 
   static unsigned int image_width_, image_height_;
-  static double focal_length_, near_, far_;
+  static double focal_length_x_, focal_length_y_, near_, far_;
   float angle_;
 
   static Matrix4d matrix_;
