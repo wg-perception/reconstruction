@@ -11,8 +11,10 @@ catkin_stack()
 catkin_project(object_recognition_reconstruction DEPENDS ecto ecto_image_pipeline ecto_pcl object_recognition_core)
 endif()
 
-find_package(ecto REQUIRED)
-find_package(object_recognition_core REQUIRED)
+find_package(ecto_pcl)
+find_package(ecto_image_pipeline)
+
+include_directories(SYSTEM ${catkin_INCLUDE_DIRS} ${object_recognition_core_INCLUDE_DIRS} ${ecto_pcl_INCLUDE_DIRS} ${ecto_image_pipeline_INCLUDE_DIRS})
 
 add_subdirectory(src)
 
