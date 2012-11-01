@@ -13,6 +13,7 @@ endif()
 
 find_package(ecto_pcl)
 find_package(ecto_image_pipeline)
+find_package(object_recognition_core)
 
 include_directories(SYSTEM ${catkin_INCLUDE_DIRS} ${object_recognition_core_INCLUDE_DIRS} ${ecto_pcl_INCLUDE_DIRS} ${ecto_image_pipeline_INCLUDE_DIRS})
 

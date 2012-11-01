@@ -27,6 +27,7 @@ if (ROS_GROOVY_FOUND)
   find_package(catkin REQUIRED roscpp)
 endif()
 link_ecto(object_recognition_reconstruction
+          ${BOOST_LIBRARIES}
           ${object_recognition_core_LIBRARIES}
           ${PCL_LIBRARIES}
           ${OpenCV_LIBS}
