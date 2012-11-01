@@ -31,7 +31,10 @@ endif()
 include_directories(${ASSIMP_INCLUDE_DIRS})
 link_directories(${ASSIMP_LIBRARY_DIRS})
 
+find_package(OpenCV REQUIRED)
+
 INCLUDE_DIRECTORIES(SYSTEM ${GLUT_INCLUDE_DIR}
+                           ${OpenCV_INCLUDE_DIR}
                            ${OPENGL_INCLUDE_DIR}
 )
 
