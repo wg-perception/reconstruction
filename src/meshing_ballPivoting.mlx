@@ -1,13 +1,21 @@
 <!DOCTYPE FilterScript>
 <FilterScript>
+ <filter name="Poisson-disk Sampling">
+  <Param type="RichInt" value="50000" name="SampleNum"/>
+  <Param type="RichAbsPerc" value="0" min="0" name="Radius" max="0.967802"/>
+  <Param type="RichInt" value="20" name="MontecarloRate"/>
+  <Param type="RichBool" value="true" name="Subsample"/>
+  <Param type="RichBool" value="false" name="RefineFlag"/>
+  <Param type="RichMesh" value="0" name="RefineMesh"/>
+ </filter>
  <filter name="Surface Reconstruction: Ball Pivoting">
-  <Param type="RichAbsPerc" value="0" min="0" name="BallRadius" max="0.967802"/>
+  <Param type="RichAbsPerc" value="0" min="0" name="BallRadius" max="0.967681"/>
   <Param type="RichFloat" value="20" name="Clustering"/>
   <Param type="RichFloat" value="90" name="CreaseThr"/>
   <Param type="RichBool" value="false" name="DeleteFaces"/>
  </filter>
  <filter name="Laplacian Smooth">
-  <Param type="RichInt" value="5" name="stepSmoothNum"/>
+  <Param type="RichInt" value="3" name="stepSmoothNum"/>
   <Param type="RichBool" value="true" name="Boundary"/>
   <Param type="RichBool" value="false" name="Selected"/>
  </filter>
