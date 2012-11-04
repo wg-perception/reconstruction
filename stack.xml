@@ -14,6 +14,7 @@
   <build_depends>ecto</build_depends>
   <build_depends>ecto_image_pipeline</build_depends>
   <build_depends>ecto_pcl</build_depends>
+  <build_depends>glut</build_depends>
   <build_depends>object_recognition_core</build_depends>
   <build_depends>opencv2</build_depends>
 
@@ -21,6 +22,7 @@
   <depends>ecto</depends>
   <depends>ecto_image_pipeline</depends>
   <depends>ecto_pcl</depends>
+  <depends>glut</depends>
   <depends>object_recognition_core</depends>
   <depends>opencv2</depends>
 </stack>
