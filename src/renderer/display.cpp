@@ -75,11 +75,12 @@ Display::set_parameters(size_t width, size_t height, double focal_length_x, doub
 void
 Display::save_to_disk()
 {
-  cv::Mat image, depth, mask;
-
+  cv::Mat image, depth;
   image.create(cv::Size(image_width_, image_height_), CV_8UC3);
   depth.create(cv::Size(image_width_, image_height_), CV_32FC1);
-  mask.create(cv::Size(image_width_, image_height_), CV_8UC1);
+
+  cv::Mat_<uchar> mask = cv::Mat_<uchar>::zeros(cv::Size(image_width_, image_height_));
+
   glFlush();
 
   glReadPixels(0, 0, image_width_, image_height_, GL_DEPTH_COMPONENT, GL_FLOAT, depth.ptr());
@@ -88,85 +89,110 @@ Display::save_to_disk()
   float zNear = near_, zFar = far_;
   cv::Mat_<float>::iterator it = depth.begin<float>(), end = depth.end<float>();
   float max_allowed_z = zFar * 0.99;
-  while (it != end)
-  {
-    //need to undo the depth buffer mapping
-    //http://olivers.posterous.com/linear-depth-in-glsl-for-real
-    *it = 2 * zFar * zNear / (zFar + zNear - (zFar - zNear) * (2 * (*it) - 1));
-    ++it;
-  }
-  cv::Mat m(depth < max_allowed_z);
-  m.copyTo(mask);
-  depth.setTo(0, 255 - mask);
+
+  unsigned int i_min = image_width_, i_max = 0, j_min = image_height_, j_max = 0;
+  for (unsigned int j = 0; j < image_height_; ++j)
+    for (unsigned int i = 0; i < image_width_; ++i, ++it)
+    {
+      //need to undo the depth buffer mapping
+      //http://olivers.posterous.com/linear-depth-in-glsl-for-real
+      *it = 2 * zFar * zNear / (zFar + zNear - (zFar - zNear) * (2 * (*it) - 1));
+      if (*it > max_allowed_z)
+        *it = 0;
+      else
+      {
+        mask(j, i) = 255;
+        // Figure the inclusive bounding box of the mask
+        if (j > j_max)
+          j_max = j;
+        else if (j < j_min)
+          j_min = j;
+        if (i > i_max)
+          i_max = i;
+        else if (i < i_min)
+          i_min = i;
+      }
+    }
 
   static size_t index = 0;
   cv::Mat depth_scale(cv::Size(image_width_, image_height_), CV_16UC1);
   depth.convertTo(depth_scale, CV_16UC1, 1e3);
 
-  cv::Mat depth_vis;
-  depth.convertTo(depth_vis, CV_8UC1, 400);
+  /*cv::Mat depth_vis;
+   depth.convertTo(depth_vis, CV_8UC1, 400);
 
-  /*float min_x = 10000, max_x = 0;
-  float min_y = 10000, max_y = 0;
-  float min_z = 10000, max_z = 0;
+   float min_x = 10000, max_x = 0;
+   float min_y = 10000, max_y = 0;
+   float min_z = 10000, max_z = 0;
 
-  // From http://nehe.gamedev.net/article/using_gluunproject/16013/
-  GLint viewport[4];
-  GLdouble modelview[16];
-  GLdouble projection[16];
-  GLfloat winX, winY, winZ;
-  GLdouble posX, posY, posZ;
+   // From http://nehe.gamedev.net/article/using_gluunproject/16013/
+   GLint viewport[4];
+   GLdouble modelview[16];
+   GLdouble projection[16];
+   GLfloat winX, winY, winZ;
+   GLdouble posX, posY, posZ;
 
-  glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-  glGetDoublev(GL_PROJECTION_MATRIX, projection);
-  glGetIntegerv(GL_VIEWPORT, viewport);
+   glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+   glGetDoublev(GL_PROJECTION_MATRIX, projection);
+   glGetIntegerv(GL_VIEWPORT, viewport);
 
-  for(unsigned int j=0;j<4;++j)
-    std::cout << viewport[j] << " ";
-  std::cout << std::endl;
-  for(unsigned int i=0;i<16;++i) {
-    modelview[i] = 0;
-    std::cout << modelview[i] << " ";
-  }
-  modelview[0] = 1;
-  modelview[5] = 1;
-  modelview[10] = 1;
-  modelview[15] = 1;
-  std::cout << std::endl;
-  for(unsigned int j=0;j<16;++j)
-    std::cout << projection[j] << " ";
-  std::cout << std::endl;
+   for(unsigned int j=0;j<4;++j)
+   std::cout << viewport[j] << " ";
+   std::cout << std::endl;
+   for(unsigned int i=0;i<16;++i) {
+   modelview[i] = 0;
+   std::cout << modelview[i] << " ";
+   }
+   modelview[0] = 1;
+   modelview[5] = 1;
+   modelview[10] = 1;
+   modelview[15] = 1;
+   std::cout << std::endl;
+   for(unsigned int j=0;j<16;++j)
+   std::cout << projection[j] << " ";
+   std::cout << std::endl;
 
-  it = depth.begin<float>();
-  for (unsigned int y = 0; y < image_height_; ++y)
-    for (unsigned int x = 0; x < image_width_; ++x, ++it)
-    {
-      if ((*it >= max_allowed_z) || (*it == 0))
-        continue;
-      winX = (float) x;
-      winY = (float) viewport[3] - (float) y;
-      glReadPixels(x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
+   it = depth.begin<float>();
+   for (unsigned int y = 0; y < image_height_; ++y)
+   for (unsigned int x = 0; x < image_width_; ++x, ++it)
+   {
+   if ((*it >= max_allowed_z) || (*it == 0))
+   continue;
+   winX = (float) x;
+   winY = (float) viewport[3] - (float) y;
+   glReadPixels(x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
 
-      gluUnProject(winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
-      std::cout << posZ << " " << (*it) << std::endl;
-      min_x = std::min(min_x, float(posX));
-      max_x = std::max(max_x, float(posX));
-      min_y = std::min(min_y, float(posY));
-      max_y = std::max(max_y, float(posY));
-      min_z = std::min(min_z, float(posZ));
-      max_z = std::max(max_z, float(posZ));
-    }
-  std::cout << min_x << " - " << max_x << " ---- " << min_y << " - " << max_y << " ---- " << min_z << " - " << max_z
-            << std::endl;
+   gluUnProject(winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
+   std::cout << posZ << " " << (*it) << std::endl;
+   min_x = std::min(min_x, float(posX));
+   max_x = std::max(max_x, float(posX));
+   min_y = std::min(min_y, float(posY));
+   max_y = std::max(max_y, float(posY));
+   min_z = std::min(min_z, float(posZ));
+   max_z = std::max(max_z, float(posZ));
+   }
+   std::cout << min_x << " - " << max_x << " ---- " << min_y << " - " << max_y << " ---- " << min_z << " - " << max_z
+   << std::endl;
 
-  cv::namedWindow("toto");
-  cv::namedWindow("toto2");
-  cv::imshow("toto", depth_vis);
-  cv::imshow("toto2", mask);
-  cv::waitKey(0);*/
+   cv::namedWindow("toto");
+   cv::namedWindow("toto2");
+   cv::imshow("toto", depth_vis);
+   cv::imshow("toto2", mask);
+   cv::waitKey(0);*/
 
-  cv::imwrite(boost::str(boost::format("depth_%05d.png") % (index)), depth_scale);
-  cv::imwrite(boost::str(boost::format("image_%05d.png") % (index)), image);
-  cv::imwrite(boost::str(boost::format("mask_%05d.png") % (index)), mask);
+  // Crop the images, just so that they are smaller to write/read
+  if (i_min > 0)
+    --i_min;
+  if (i_max < image_width_ - 1)
+    ++i_max;
+  if (j_min > 0)
+    --j_min;
+  if (j_max < image_height_ - 1)
+    ++j_max;
+  cv::Rect rect(i_min, j_min, i_max - i_min + 1, j_max - j_min + 1);
+
+  cv::imwrite(boost::str(boost::format("depth_%05d.png") % (index)), depth_scale(rect));
+  cv::imwrite(boost::str(boost::format("image_%05d.png") % (index)), image(rect));
+  cv::imwrite(boost::str(boost::format("mask_%05d.png") % (index)), mask(rect));
   ++index;
 }
