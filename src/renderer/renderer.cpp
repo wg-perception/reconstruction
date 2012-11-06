@@ -33,6 +33,7 @@
 // settings and displays it.
 // ----------------------------------------------------------------------------
 
+#include <iostream>
 #include <stdlib.h>
 
 #include <GL/glut.h>
@@ -92,9 +93,8 @@ display_function(void)
   //glRotatef(angle, 0.f, 1.f, 0.f);
 
   // Figure a view point on the sphere
-  static unsigned int nx = 15, ny = 15;
-  static unsigned int X = 0;
-  static unsigned int Y = 0;
+  static unsigned int n_points = 150;
+  static unsigned int n = 0;
   // Angle in degrees
   static int angle_min = -80, angle_max = 80, angle_step = 40, angle = angle_min;
   static float radius_min = 0.4, radius_max = 0.8, radius_step = 0.2, radius = radius_min;
@@ -108,27 +108,39 @@ display_function(void)
     if (radius > radius_max)
     {
       radius = radius_min;
-      ++Y;
-      if (Y >= ny/2)
+      ++n;
+      if (n >= n_points)
       {
-        Y = 0;
-        ++X;
-        if (X >= nx)
-          // Ugly hack to exit glutMainLoop
-          throw("something");
+        // Ugly hack to exit glutMainLoop
+        throw("something");
       }
     }
   }
-  float lon = 2 * PI * ((X + 0.5) / nx);
-  float lat = asin((2 * (Y + 0.5) / ny - 1));
-  unsigned int n_templates = ((angle_max - angle_min) / angle_step + 1) * nx * ny
+  unsigned int n_templates = ((angle_max - angle_min) / angle_step + 1) * n_points
                              * ((radius_max - radius_min) / radius_step + 1);
   std::cout << n_templates << " templates: " << float(index * 100) / float(n_templates) << std::endl;
-  std::cout << angle << " " << lon << " " << lat << " " << radius << std::endl;
+  //std::cout << angle << " " << lon << " " << lat << " " << radius << std::endl;
 
-  float x = radius * cos(lon) * sin(lat);
-  float y = radius * sin(lon) * sin(lat);
-  float z = radius * cos(lat);
+  // from http://www.xsi-blog.com/archives/115
+  static float inc = PI * (3 - sqrt(5));
+  static float off = 2.0 / float(n_points);
+  float y = n * off - 1 + (off / 2);
+  float r = sqrt(1 - y * y);
+  float phi = n * inc;
+  float x = cos(phi) * r;
+  float z = sin(phi) * r;
+
+  float lat = acos(z);
+  float lon;
+  if ((abs(sin(lat)) < 1e-5) || (abs(y / sin(lat)) > 1))
+    lon = 0;
+  else
+    lon = asin(y / sin(lat));
+
+  x *= radius; // * cos(lon) * sin(lat);
+  y *= radius; //float y = radius * sin(lon) * sin(lat);
+  z *= radius; //float z = radius * cos(lat);
+
   // Figure out the up vector
   float x_up = radius * cos(lon) * sin(lat - 1e-5) - x;
   float y_up = radius * sin(lon) * sin(lat - 1e-5) - y;
