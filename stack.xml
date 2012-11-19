@@ -14,6 +14,7 @@
   <build_depends>ecto</build_depends>
   <build_depends>ecto_image_pipeline</build_depends>
   <build_depends>ecto_pcl</build_depends>
+  <build_depends>freeimage</build_depends>
   <build_depends>glut</build_depends>
   <build_depends>libxi-dev</build_depends>
   <build_depends>libxmu-dev</build_depends>
@@ -25,6 +26,7 @@
   <depends>ecto</depends>
   <depends>ecto_image_pipeline</depends>
   <depends>ecto_pcl</depends>
+  <depends>freeimage</depends>
   <depends>glut</depends>
   <depends>libxi-dev</depends>
   <depends>libxmu-dev</depends>
