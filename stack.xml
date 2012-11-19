@@ -19,6 +19,7 @@
   <build_depends>libxmu-dev</build_depends>
   <build_depends>object_recognition_core</build_depends>
   <build_depends>opencv2</build_depends>
+  <build_depends>sdl</build_depends>
 
   <depends>assimp</depends>
   <depends>ecto</depends>
@@ -29,4 +30,5 @@
   <depends>libxmu-dev</depends>
   <depends>object_recognition_core</depends>
   <depends>opencv2</depends>
+  <depends>sdl</depends>
 </stack>
