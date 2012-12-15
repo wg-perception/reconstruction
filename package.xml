@@ -8,8 +8,8 @@
   <license>BSD></license>
 
   <url>http://ecto.willowgarage.com/recognition</url>
+
   <build_depend>assimp</build_depend>
-  <build_depend>catkin</build_depend>
   <build_depend>ecto</build_depend>
   <build_depend>ecto_image_pipeline</build_depend>
   <build_depend>ecto_pcl</build_depend>
@@ -34,4 +34,6 @@
   <run_depend>object_recognition_core</run_depend>
   <run_depend>opencv2</run_depend>
   <run_depend>sdl</run_depend>
+
+  <buildtool_depend>catkin</buildtool_depend>
 </package>
