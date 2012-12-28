@@ -44,50 +44,16 @@
 
 // the global Assimp scene object
 GLuint scene_list = 0;
-GLuint textureId;                   // ID of texture
 
 #define aisgl_min(x,y) (x<y?x:y)
 #define aisgl_max(x,y) (y>x?y:x)
 
-double PI = 3.14159;
-
-GLuint fboId;                       // ID of FBO
-
 // ----------------------------------------------------------------------------
 void
-reshape(int width, int height)
-{
-  glMatrixMode (GL_PROJECTION);
-  glLoadIdentity();
-
-  double fx = Display::focal_length_x();
-  double fy = Display::focal_length_y();
-  double fovy = 2 * atan(0.5 * height / fy) * 180 / PI;
-  double aspect = (width * fy) / (height * fx);
-
-  // define the near and far clipping planes
-  double near = Display::near();
-  double far = Display::far();
-
-  // set perspective
-  gluPerspective(fovy, aspect, near, far);
-  glViewport(0, 0, width, height);
-}
-
-void
-normalize_vector(float & x, float&y, float&z)
-{
-  float norm = std::sqrt(x * x + y * y + z * z);
-  x /= norm;
-  y /= norm;
-  z /= norm;
-}
-// ----------------------------------------------------------------------------
-void
-display_function(void)
+display_function(const Display & display)
 {
   float tmp;
-  glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+  glBindFramebuffer(GL_FRAMEBUFFER, display.fbo_id_);
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -198,21 +164,8 @@ display_function(void)
 
   glCallList(scene_list);
 
-  /*glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-  // trigger mipmaps generation explicitly
-  // NOTE: If GL_GENERATE_MIPMAP is set to GL_TRUE, then glCopyTexSubImage2D()
-  // triggers mipmap generation automatically. However, the texture attached
-  // onto a FBO should generate mipmaps manually via glGenerateMipmap().
-  glBindTexture(GL_TEXTURE_2D, textureId);
-  glGenerateMipmap(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, 0);
-*/
-
-
   if (index > 0)
-    Display::save_to_disk(fboId);
+    Display::save_to_disk(display.fbo_id_);
 
 
 
@@ -243,38 +196,6 @@ display_function(void)
 
 
 
-// global variables
-GLuint rboId;                       // ID of Renderbuffer object
-
-///////////////////////////////////////////////////////////////////////////////
-// initialize global variables
-///////////////////////////////////////////////////////////////////////////////
-bool initSharedMem()
-{
-    fboId = rboId = textureId = 0;
-
-    return true;
-}
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// clean up global variables
-///////////////////////////////////////////////////////////////////////////////
-void clearSharedMem()
-{
-    glDeleteTextures(1, &textureId);
-    textureId = 0;
-
-    // clean up FBO, RBO
-        glDeleteFramebuffers(1, &fboId);
-        fboId = 0;
-        glDeleteRenderbuffers(1, &rboId);
-        rboId = 0;
-}
-
-
-
 
 
 
@@ -298,7 +219,7 @@ main(int argc, char **argv)
   // the model name can be specified on the command line.
   Display display;
   Display::load_model(argv[1]);
-  Display::set_parameters(width, height, focal_length_x, focal_length_y, near, far);
+  display.set_parameters(width, height, focal_length_x, focal_length_y, near, far);
 
   glutInit(&argc, argv);
   glutCreateWindow("Assimp - Very simple OpenGL sample");
@@ -315,56 +236,12 @@ main(int argc, char **argv)
   aiAttachLogStream(&stream);
 
 
+  display.set_parameters(width, height, focal_length_x, focal_length_y, near, far);
 
 
 
 
 
-
-
-  // create a texture object
-  glGenTextures(1, &textureId);
-  glBindTexture(GL_TEXTURE_2D, textureId);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  //glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE); // automatic mipmap generation included in OpenGL v1.4
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-  glBindTexture(GL_TEXTURE_2D, 0);
-
-
-
-
-  // create a framebuffer object, you need to delete them when program exits.
-  glGenFramebuffers(1, &fboId);
-  glBindFramebuffer(GL_FRAMEBUFFER, fboId);
-
-  // create a renderbuffer object to store depth info
-  // NOTE: A depth renderable image should be attached the FBO for depth test.
-  // If we don't attach a depth renderable image to the FBO, then
-  // the rendering output will be corrupted because of missing depth test.
-  // If you also need stencil test for your rendering, then you must
-  // attach additional image to the stencil attachement point, too.
-  glGenRenderbuffers(1, &rboId);
-  glBindRenderbuffer(GL_RENDERBUFFER, rboId);
-  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-  glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-  // attach a texture to FBO color attachement point
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureId, 0);
-
-  // attach a renderbuffer to depth attachment point
-  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboId);
-
-  //@@ disable color buffer if you don't attach any color buffer image,
-  //@@ for example, rendering the depth buffer only to a texture.
-  //@@ Otherwise, glCheckFramebufferStatus will not be complete.
-  //glDrawBuffer(GL_NONE);
-  //glReadBuffer(GL_NONE);
 
 
 
@@ -388,10 +265,10 @@ main(int argc, char **argv)
 
   //glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-  reshape(width, height);
+  display.reshape();
 
   for(size_t i=0;i<100;++i)
-    display_function();
+    display_function(display);
 
   // We added a log stream to the library, it's our job to disable it
   // again. This will definitely release the last resources allocated
