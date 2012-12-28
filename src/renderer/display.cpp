@@ -33,7 +33,14 @@
  *
  */
 
+#define GL_GLEXT_PROTOTYPES
 #include "display.h"
+
+#include <iostream>
+#include <stdlib.h>
+
+#include <GL/glut.h>
+
 
 unsigned int Display::image_width_ = 0, Display::image_height_ = 0;
 double Display::focal_length_x_ = 0, Display::focal_length_y_ = 0, Display::near_ = 0, Display::far_ = 0;
@@ -73,7 +80,7 @@ Display::set_parameters(size_t width, size_t height, double focal_length_x, doub
 }
 
 void
-Display::save_to_disk()
+Display::save_to_disk(GLuint fbo)
 {
   cv::Mat image, depth;
   image.create(cv::Size(image_width_, image_height_), CV_8UC3);
@@ -83,8 +90,15 @@ Display::save_to_disk()
 
   glFlush();
 
+  glBindFramebuffer(GL_FRAMEBUFFER_EXT, fbo);
+  glReadBuffer(GL_DEPTH_ATTACHMENT);
   glReadPixels(0, 0, image_width_, image_height_, GL_DEPTH_COMPONENT, GL_FLOAT, depth.ptr());
+  glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
+
+  glBindFramebuffer(GL_FRAMEBUFFER_EXT, fbo);
+  glReadBuffer(GL_COLOR_ATTACHMENT0);
   glReadPixels(0, 0, image_width_, image_height_, GL_BGR, GL_UNSIGNED_BYTE, image.ptr());
+  glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
 
   float zNear = near_, zFar = far_;
   cv::Mat_<float>::iterator it = depth.begin<float>(), end = depth.end<float>();

@@ -66,7 +66,7 @@ public:
   set_parameters(size_t width, size_t height, double focal_length_x, double focal_length_y, double near, double far);
 
   void
-  display(void)
+  display(GLuint fboId)
   {
     float tmp;
 
@@ -112,13 +112,13 @@ public:
     glutSwapBuffers();
 
     // Save the interesting data to disk
-    save_to_disk();
+    save_to_disk(fboId);
 
     do_motion();
   }
 
   static void
-  save_to_disk();
+  save_to_disk(GLuint fbo);
 
   static const Model &
   model()

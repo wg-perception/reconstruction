@@ -33,15 +33,9 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
 
-#if IS_ASSIMP3
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#else
-#include <assimp/assimp.h>
-#include <assimp/aiScene.h>
-#include <assimp/aiPostProcess.h>
-#endif
 
 #include <FreeImage.h>
 #include <vector>

@@ -33,6 +33,8 @@
 // settings and displays it.
 // ----------------------------------------------------------------------------
 
+#define GL_GLEXT_PROTOTYPES
+
 #include <iostream>
 #include <stdlib.h>
 
@@ -42,11 +44,14 @@
 
 // the global Assimp scene object
 GLuint scene_list = 0;
+GLuint textureId;                   // ID of texture
 
 #define aisgl_min(x,y) (x<y?x:y)
 #define aisgl_max(x,y) (y>x?y:x)
 
 double PI = 3.14159;
+
+GLuint fboId;                       // ID of FBO
 
 // ----------------------------------------------------------------------------
 void
@@ -82,6 +87,7 @@ void
 display_function(void)
 {
   float tmp;
+  glBindFramebuffer(GL_FRAMEBUFFER, fboId);
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -194,12 +200,131 @@ display_function(void)
 
   glutSwapBuffers();
 
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+  // trigger mipmaps generation explicitly
+  // NOTE: If GL_GENERATE_MIPMAP is set to GL_TRUE, then glCopyTexSubImage2D()
+  // triggers mipmap generation automatically. However, the texture attached
+  // onto a FBO should generate mipmaps manually via glGenerateMipmap().
+  glBindTexture(GL_TEXTURE_2D, textureId);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+
+
   if (index > 0)
-    Display::save_to_disk();
+    Display::save_to_disk(fboId);
+
+
 
   glutPostRedisplay();
   ++index;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// constants
+const int   SCREEN_WIDTH    = 640;
+const int   SCREEN_HEIGHT   = 480;
+const float CAMERA_DISTANCE = 6.0f;
+const int   TEXT_WIDTH      = 8;
+const int   TEXT_HEIGHT     = 13;
+
+
+// global variables
+GLuint rboId;                       // ID of Renderbuffer object
+void *font = GLUT_BITMAP_8_BY_13;
+int screenWidth;
+int screenHeight;
+bool mouseLeftDown;
+bool mouseRightDown;
+float mouseX, mouseY;
+float cameraAngleX;
+float cameraAngleY;
+float cameraDistance;
+bool fboSupported;
+bool fboUsed;
+int drawMode;
+float playTime;                     // to compute rotation angle
+float renderToTextureTime;          // elapsed time for render-to-texture
+
+///////////////////////////////////////////////////////////////////////////////
+// initialize global variables
+///////////////////////////////////////////////////////////////////////////////
+bool initSharedMem()
+{
+    screenWidth = SCREEN_WIDTH;
+    screenHeight = SCREEN_HEIGHT;
+
+    mouseLeftDown = mouseRightDown = false;
+    mouseX = mouseY = 0;
+
+    cameraAngleX = cameraAngleY = 45;
+    cameraDistance = CAMERA_DISTANCE;
+
+    drawMode = 0; // 0:fill, 1: wireframe, 2:points
+
+    fboId = rboId = textureId = 0;
+    fboSupported = fboUsed = false;
+    playTime = renderToTextureTime = 0;
+
+    return true;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// clean up global variables
+///////////////////////////////////////////////////////////////////////////////
+void clearSharedMem()
+{
+    glDeleteTextures(1, &textureId);
+    textureId = 0;
+
+    // clean up FBO, RBO
+    if(fboSupported)
+    {
+        glDeleteFramebuffers(1, &fboId);
+        fboId = 0;
+        glDeleteRenderbuffers(1, &rboId);
+        rboId = 0;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
 
 // ----------------------------------------------------------------------------
 int
@@ -254,6 +379,70 @@ main(int argc, char **argv)
   glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
 
   glutGet(GLUT_ELAPSED_TIME);
+
+
+
+
+
+
+
+
+
+
+
+  // create a texture object
+  glGenTextures(1, &textureId);
+  glBindTexture(GL_TEXTURE_2D, textureId);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  //glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE); // automatic mipmap generation included in OpenGL v1.4
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+
+
+
+  // create a framebuffer object, you need to delete them when program exits.
+  glGenFramebuffers(1, &fboId);
+  glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+
+  // create a renderbuffer object to store depth info
+  // NOTE: A depth renderable image should be attached the FBO for depth test.
+  // If we don't attach a depth renderable image to the FBO, then
+  // the rendering output will be corrupted because of missing depth test.
+  // If you also need stencil test for your rendering, then you must
+  // attach additional image to the stencil attachement point, too.
+  glGenRenderbuffers(1, &rboId);
+  glBindRenderbuffer(GL_RENDERBUFFER, rboId);
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+  glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+  // attach a texture to FBO color attachement point
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureId, 0);
+
+  // attach a renderbuffer to depth attachment point
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboId);
+
+  //@@ disable color buffer if you don't attach any color buffer image,
+  //@@ for example, rendering the depth buffer only to a texture.
+  //@@ Otherwise, glCheckFramebufferStatus will not be complete.
+  //glDrawBuffer(GL_NONE);
+  //glReadBuffer(GL_NONE);
+
+  // check FBO status
+      fboUsed = true;
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+
+
+
   try
   {
     glutMainLoop();
