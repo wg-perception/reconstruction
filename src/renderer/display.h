@@ -49,9 +49,7 @@
 
 using Eigen::Matrix4d;
 
-
 static double PI = 3.14159;
-
 
 void
 normalize_vector(float & x, float&y, float&z);
@@ -65,58 +63,60 @@ public:
 
   ~Display();
 
-  static void
+  void
   load_model(const char * file_name);
 
   void
   set_parameters(size_t width, size_t height, double focal_length_x, double focal_length_y, double near, double far);
 
-  void reshape();
+  void
+  reshape();
 
   void
   display();
 
-  static void
-  save_to_disk(GLuint fbo);
+  void
+  save_to_disk(GLuint fbo) const;
 
-  static const Model &
-  model()
+  const Model &
+  model() const
   {
     return model_;
   }
 
-  static const double
+  const double
   near()
   {
     return near_;
   }
 
-  static const double
+  const double
   far()
   {
     return far_;
   }
 
-  static const double
+  const double
   focal_length_x()
   {
     return focal_length_x_;
   }
 
-  static const double
+  const double
   focal_length_y()
   {
     return focal_length_y_;
   }
 //private:
-  void clean_buffers();
+  void
+  clean_buffers();
 
-  static unsigned int width_, height_;
-  static double focal_length_x_, focal_length_y_, near_, far_;
+  unsigned int width_, height_;
+  double focal_length_x_, focal_length_y_, near_, far_;
   float angle_;
 
-  static Matrix4d matrix_;
-  static Model model_;
+  Matrix4d matrix_;
+  Model model_;
   GLuint scene_list_;
   /** The frame buffer object used for offline rendering */
   GLuint fbo_id_;

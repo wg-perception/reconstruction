@@ -50,18 +50,19 @@ normalize_vector(float & x, float&y, float&z)
   z /= norm;
 }
 
-unsigned int Display::width_ = 0, Display::height_ = 0;
-double Display::focal_length_x_ = 0, Display::focal_length_y_ = 0, Display::near_ = 0, Display::far_ = 0;
-
-Matrix4d Display::matrix_;
-Model Display::model_;
-
 Display::Display()
     :
       angle_(0),
       fbo_id_(0),
       rbo_id_(0),
-      texture_id_(0)
+      texture_id_(0),
+      width_(0),
+      height_(0),
+      focal_length_x_(0),
+      focal_length_y_(0),
+      near_(0),
+      far_(0),
+      scene_list_(0)
 {
 }
 
@@ -157,7 +158,7 @@ Display::set_parameters(size_t width, size_t height, double focal_length_x, doub
 void
 Display::reshape()
 {
-  glMatrixMode (GL_PROJECTION);
+  glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
 
   double fx = Display::focal_length_x();
@@ -260,7 +261,7 @@ Display::display()
 
   // scale the whole asset to fit into our view frustum
   aiVector3D scene_min, scene_max, scene_center;
-  Display::model().get_bounding_box(&scene_min, &scene_max);
+  model_.get_bounding_box(&scene_min, &scene_max);
   scene_center.x = (scene_min.x + scene_max.x) / 2.0f;
   scene_center.y = (scene_min.y + scene_max.y) / 2.0f;
   scene_center.z = (scene_min.z + scene_max.z) / 2.0f;
@@ -283,7 +284,7 @@ Display::display()
     // now begin at the root node of the imported data and traverse
     // the scenegraph by multiplying subsequent local transforms
     // together on GL's matrix stack.
-    Display::model().Draw();
+    model_.Draw();
     glEndList();
   }
 
@@ -296,7 +297,7 @@ Display::display()
 }
 
 void
-Display::save_to_disk(GLuint fbo)
+Display::save_to_disk(GLuint fbo) const
 {
   cv::Mat image, depth;
   image.create(cv::Size(width_, height_), CV_8UC3);
