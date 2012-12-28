@@ -41,7 +41,6 @@
 #include <eigen3/Eigen/Eigen>
 
 #include <GL/gl.h>
-#include <GL/glut.h>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -50,126 +49,92 @@
 
 using Eigen::Matrix4d;
 
+static double PI = 3.14159;
+
+void
+normalize_vector(float & x, float&y, float&z);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 class Display
 {
 public:
-  Display()
-      :
-        angle_(0)
-  {
-  }
+  Display();
 
-  static void
+  ~Display();
+
+  void
   load_model(const char * file_name);
 
-  static void
+  void
   set_parameters(size_t width, size_t height, double focal_length_x, double focal_length_y, double near, double far);
 
   void
-  display(void)
-  {
-    float tmp;
+  reshape();
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  void
+  display();
 
-    glMatrixMode (GL_MODELVIEW);
-    glLoadIdentity();
-    gluLookAt(0.f, 0.f, 3.f, 0.f, 0.f, -5.f, 0.f, 1.f, 0.f);
+  void
+  save_to_disk(GLuint fbo) const;
 
-    // rotate it around the y axis
-    glRotatef(angle_, 0.f, 1.f, 0.f);
-
-    // scale the whole asset to fit into our view frustum
-    model_.get_bounding_box(&scene_min_, &scene_max_);
-    scene_center_.x = (scene_min_.x + scene_max_.x) / 2.0f;
-    scene_center_.y = (scene_min_.y + scene_max_.y) / 2.0f;
-    scene_center_.z = (scene_min_.z + scene_max_.z) / 2.0f;
-
-    tmp = scene_max_.x - scene_min_.x;
-    tmp = aisgl_max(scene_max_.y - scene_min_.y, tmp);
-    tmp = aisgl_max(scene_max_.z - scene_min_.z, tmp);
-    tmp = 1.f / tmp;
-    glScalef(tmp, tmp, tmp);
-
-    // center the model
-    glTranslatef(-scene_center_.x, -scene_center_.y, -scene_center_.z);
-
-    // if the display list has not been made yet, create a new one and
-    // fill it with scene contents
-    if (scene_list_ == 0)
-    {
-      scene_list_ = glGenLists(1);
-      glNewList(scene_list_, GL_COMPILE);
-      // now begin at the root node of the imported data and traverse
-      // the scenegraph by multiplying subsequent local transforms
-      // together on GL's matrix stack.
-      model_.Draw();
-      glEndList();
-    }
-
-    glCallList(scene_list_);
-
-    glutSwapBuffers();
-
-    // Save the interesting data to disk
-    save_to_disk();
-
-    do_motion();
-  }
-
-  static void
-  save_to_disk();
-
-  static const Model &
-  model()
+  const Model &
+  model() const
   {
     return model_;
   }
 
-  static const double
+  const double
   near()
   {
     return near_;
   }
 
-  static const double
+  const double
   far()
   {
     return far_;
   }
 
-  static const double
+  const double
   focal_length_x()
   {
     return focal_length_x_;
   }
 
-  static const double
+  const double
   focal_length_y()
   {
     return focal_length_y_;
   }
-private:
+//private:
   void
-  do_motion(void)
-  {
-    static GLint prev_time = 0;
+  clean_buffers();
 
-    int time = glutGet(GLUT_ELAPSED_TIME);
-    angle_ += (time - prev_time) * 0.01;
-    prev_time = time;
-
-    glutPostRedisplay();
-  }
-
-  static unsigned int image_width_, image_height_;
-  static double focal_length_x_, focal_length_y_, near_, far_;
+  unsigned int width_, height_;
+  double focal_length_x_, focal_length_y_, near_, far_;
   float angle_;
 
-  static Matrix4d matrix_;
-  static Model model_;
+  Matrix4d matrix_;
+  Model model_;
   GLuint scene_list_;
+  /** The frame buffer object used for offline rendering */
+  GLuint fbo_id_;
+  /** The render buffer object used for offline depth rendering */
+  GLuint rbo_id_;
+  /** The render buffer object used for offline image rendering */
+  GLuint texture_id_;
   aiVector3D scene_min_, scene_max_, scene_center_;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/** Class that enables iterating viewpoint over a sphere.
+ * This function is used to generate templates in LINE-MOD
+ */
+class DisplayIterator
+{
+
 };
 
 #endif /* CAMERA_H_ */
