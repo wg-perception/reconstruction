@@ -64,16 +64,3 @@ TARGET_LINK_LIBRARIES(view_generator ${EXTRA_LIBRARIES}
 SET_TARGET_PROPERTIES(view_generator PROPERTIES
                                      OUTPUT_NAME view_generator
 )
-
-
-ADD_EXECUTABLE(view_generator2 Timer.cpp
-                               main.cpp
-                               glInfo.cpp
-display.cpp
-Model.cpp
-                               ${EXTRA_SOURCES}
-)
-
-TARGET_LINK_LIBRARIES(view_generator2 ${EXTRA_LIBRARIES}
-                                     ${OpenCV_LIBRARIES}
-                                     ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} IL ILU ILUT freeimage)
