@@ -20,15 +20,12 @@ if (NOT ASSIMP_FOUND)
   message(WARNING "ASsimp not found, not building synthetic views")
 endif()
 if( ${ASSIMP_VERSION} STRGREATER "2.0.0" )
-  set(IS_ASSIMP3 1)
-  add_definitions(-DIS_ASSIMP3=1)
   message(STATUS "Found assimp v3")
   set(EXTRA_SOURCES)
   set(EXTRA_LIBRARIES assimp)
 else()
-  add_definitions(-DIS_ASSIMP3=0)
-  message(STATUS "Found assimp v2")
-  include_directories(./assimp/include)
+  message(STATUS "Building assimp v3")
+  set(ASSIMP_INCLUDE_DIRS ./assimp/include)
   aux_source_directory(./assimp/contrib/clipper EXTRA_SOURCES_clipper)
   aux_source_directory(./assimp/contrib/ConvertUTF EXTRA_SOURCES_ConvertUTF)
   aux_source_directory(./assimp/contrib/irrXML EXTRA_SOURCES_irrXML)
@@ -42,8 +39,9 @@ else()
   set(EXTRA_LIBRARIES)
 endif()
 
-include_directories(${ASSIMP_INCLUDE_DIRS})
-link_directories(${ASSIMP_LIBRARY_DIRS})
+
+include_directories(BEFORE ${ASSIMP_INCLUDE_DIRS})
+#link_directories(${ASSIMP_LIBRARY_DIRS})
 
 find_package(OpenCV REQUIRED)
 
@@ -71,6 +69,8 @@ SET_TARGET_PROPERTIES(view_generator PROPERTIES
 ADD_EXECUTABLE(view_generator2 Timer.cpp
                                main.cpp
                                glInfo.cpp
+display.cpp
+Model.cpp
                                ${EXTRA_SOURCES}
 )
 
