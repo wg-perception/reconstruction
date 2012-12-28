@@ -36,6 +36,8 @@
 #ifndef CAMERA_H_
 #define CAMERA_H_
 
+#include <string>
+
 #include <boost/format.hpp>
 
 #include <eigen3/Eigen/Eigen>
@@ -56,15 +58,21 @@ normalize_vector(float & x, float&y, float&z);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/** Class that displays a scene ina Frame Buffer Object
+ * Inspired by http://www.songho.ca/opengl/gl_fbo.html
+ */
 class Display
 {
 public:
-  Display();
+  /**
+   * @param file_path the path of the mesh file
+   */
+  Display(const std::string & file_path);
 
   ~Display();
 
   void
-  load_model(const char * file_name);
+  load_model(const std::string & file_path);
 
   void
   set_parameters(size_t width, size_t height, double focal_length_x, double focal_length_y, double near, double far);

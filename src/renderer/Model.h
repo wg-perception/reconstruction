@@ -69,7 +69,7 @@ public:
   ~Model();
 
   void
-  LoadModel(const char* fileName);
+  LoadModel(const std::string & fileName);
   void
   Draw() const;
 

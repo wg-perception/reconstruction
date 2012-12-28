@@ -44,9 +44,9 @@ Model::~Model()
 }
 
 void
-Model::LoadModel(const char* fileName)
+Model::LoadModel(const std::string & file_path)
 {
-  scene = aiImportFile(fileName, aiProcessPreset_TargetRealtime_Quality);
+  scene = aiImportFile(file_path.c_str(), aiProcessPreset_TargetRealtime_Quality);
   recursiveTextureLoad(scene, scene->mRootNode);
 }
 

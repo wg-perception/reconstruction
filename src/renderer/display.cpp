@@ -50,7 +50,7 @@ normalize_vector(float & x, float&y, float&z)
   z /= norm;
 }
 
-Display::Display()
+Display::Display(const std::string & file_name)
     :
       angle_(0),
       fbo_id_(0),
@@ -64,6 +64,7 @@ Display::Display()
       far_(0),
       scene_list_(0)
 {
+  model_.LoadModel(file_name);
 }
 
 Display::~Display()
@@ -85,12 +86,6 @@ Display::clean_buffers()
   if (rbo_id_)
     glDeleteRenderbuffers(1, &rbo_id_);
   rbo_id_ = 0;
-}
-
-void
-Display::load_model(const char * file_name)
-{
-  model_.LoadModel(file_name);
 }
 
 void
@@ -119,40 +114,43 @@ Display::set_parameters(size_t width, size_t height, double focal_length_x, doub
 
   clean_buffers();
 
-  // create a texture object
-  glGenTextures(1, &texture_id_);
-  glBindTexture(GL_TEXTURE_2D, texture_id_);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  //glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE); // automatic mipmap generation included in OpenGL v1.4
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width_, height_, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-  glBindTexture(GL_TEXTURE_2D, 0);
+  int argc = 0;
+  char **argv = 0;
 
-  // create a framebuffer object, you need to delete them when program exits.
+  // Create an OpenGL context
+  glutInit(&argc, argv);
+  // By doing so, the window is not open
+  glutInitDisplayMode(GLUT_DOUBLE);
+  glutCreateWindow("Assimp - Very simple OpenGL sample");
+
+  // create a framebuffer object
   glGenFramebuffers(1, &fbo_id_);
   glBindFramebuffer(GL_FRAMEBUFFER, fbo_id_);
 
+  // create a texture object
+  glGenTextures(1, &texture_id_);
+  glBindTexture(GL_TEXTURE_2D, texture_id_);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width_, height_, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_id_, 0);
+
   // create a renderbuffer object to store depth info
-  // NOTE: A depth renderable image should be attached the FBO for depth test.
-  // If we don't attach a depth renderable image to the FBO, then
-  // the rendering output will be corrupted because of missing depth test.
-  // If you also need stencil test for your rendering, then you must
-  // attach additional image to the stencil attachement point, too.
   glGenRenderbuffers(1, &rbo_id_);
   glBindRenderbuffer(GL_RENDERBUFFER, rbo_id_);
   glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width_, height_);
-  glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-  // attach a texture to FBO color attachement point
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_id_, 0);
-
-  // attach a renderbuffer to depth attachment point
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo_id_);
+
+  // Initialize the environment
+  glClearColor(0.f, 0.f, 0.f, 1.f);
+
+  glEnable(GL_LIGHTING);
+  glEnable(GL_LIGHT0); // Uses default lighting parameters
+
+  glEnable(GL_DEPTH_TEST);
+
+  glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+  glEnable(GL_NORMALIZE);
+
+  glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
 }
 
 void
@@ -180,6 +178,7 @@ Display::display()
 {
   float tmp;
   glBindFramebuffer(GL_FRAMEBUFFER, fbo_id_);
+  glBindRenderbuffer(GL_RENDERBUFFER, rbo_id_);
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -290,8 +289,7 @@ Display::display()
 
   glCallList(scene_list_);
 
-  if (index > 0)
-    Display::save_to_disk(fbo_id_);
+  Display::save_to_disk(fbo_id_);
 
   ++index;
 }
@@ -310,12 +308,9 @@ Display::save_to_disk(GLuint fbo) const
   glBindFramebuffer(GL_FRAMEBUFFER_EXT, fbo);
   glReadBuffer(GL_DEPTH_ATTACHMENT);
   glReadPixels(0, 0, width_, height_, GL_DEPTH_COMPONENT, GL_FLOAT, depth.ptr());
-  glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
 
-  glBindFramebuffer(GL_FRAMEBUFFER_EXT, fbo);
   glReadBuffer(GL_COLOR_ATTACHMENT0);
   glReadPixels(0, 0, width_, height_, GL_BGR, GL_UNSIGNED_BYTE, image.ptr());
-  glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
 
   float zNear = near_, zFar = far_;
   cv::Mat_<float>::iterator it = depth.begin<float>(), end = depth.end<float>();

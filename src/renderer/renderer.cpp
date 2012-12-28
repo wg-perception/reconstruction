@@ -53,12 +53,7 @@ main(int argc, char **argv)
   double focal_length_x = 525, focal_length_y = 525;
 
   // the model name can be specified on the command line.
-  Display display;
-  display.load_model(argv[1]);
-  display.set_parameters(width, height, focal_length_x, focal_length_y, near, far);
-
-  glutInit(&argc, argv);
-  glutCreateWindow("Assimp - Very simple OpenGL sample");
+  Display display = Display(std::string(argv[1]));
 
   // get a handle to the predefined STDOUT log stream and attach
   // it to the logging system. It remains active for all further
@@ -73,33 +68,6 @@ main(int argc, char **argv)
 
 
   display.set_parameters(width, height, focal_length_x, focal_length_y, near, far);
-
-
-
-
-
-
-
-
-  glClearColor(0.1f, 0.1f, 0.1f, 1.f);
-
-  glEnable (GL_LIGHTING);
-  glEnable (GL_LIGHT0); // Uses default lighting parameters
-
-  glEnable (GL_DEPTH_TEST);
-
-  glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-  glEnable (GL_NORMALIZE);
-
-  // XXX docs say all polygons are emitted CCW, but tests show that some aren't.
-  if (getenv("MODEL_IS_BROKEN"))
-    glFrontFace (GL_CW);
-
-  glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
-
-
-
-  //glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   display.reshape();
 
