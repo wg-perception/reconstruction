@@ -41,7 +41,6 @@
 #include <eigen3/Eigen/Eigen>
 
 #include <GL/gl.h>
-#include <GL/glut.h>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -109,8 +108,6 @@ public:
 
     glCallList(scene_list_);
 
-    glutSwapBuffers();
-
     // Save the interesting data to disk
     save_to_disk(fboId);
 
@@ -153,13 +150,6 @@ private:
   void
   do_motion(void)
   {
-    static GLint prev_time = 0;
-
-    int time = glutGet(GLUT_ELAPSED_TIME);
-    angle_ += (time - prev_time) * 0.01;
-    prev_time = time;
-
-    glutPostRedisplay();
   }
 
   static unsigned int image_width_, image_height_;

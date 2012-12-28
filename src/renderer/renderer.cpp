@@ -198,9 +198,7 @@ display_function(void)
 
   glCallList(scene_list);
 
-  glutSwapBuffers();
-
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  /*glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
   // trigger mipmaps generation explicitly
@@ -210,7 +208,7 @@ display_function(void)
   glBindTexture(GL_TEXTURE_2D, textureId);
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
-
+*/
 
 
   if (index > 0)
@@ -218,7 +216,6 @@ display_function(void)
 
 
 
-  glutPostRedisplay();
   ++index;
 }
 
@@ -246,51 +243,15 @@ display_function(void)
 
 
 
-
-// constants
-const int   SCREEN_WIDTH    = 640;
-const int   SCREEN_HEIGHT   = 480;
-const float CAMERA_DISTANCE = 6.0f;
-const int   TEXT_WIDTH      = 8;
-const int   TEXT_HEIGHT     = 13;
-
-
 // global variables
 GLuint rboId;                       // ID of Renderbuffer object
-void *font = GLUT_BITMAP_8_BY_13;
-int screenWidth;
-int screenHeight;
-bool mouseLeftDown;
-bool mouseRightDown;
-float mouseX, mouseY;
-float cameraAngleX;
-float cameraAngleY;
-float cameraDistance;
-bool fboSupported;
-bool fboUsed;
-int drawMode;
-float playTime;                     // to compute rotation angle
-float renderToTextureTime;          // elapsed time for render-to-texture
 
 ///////////////////////////////////////////////////////////////////////////////
 // initialize global variables
 ///////////////////////////////////////////////////////////////////////////////
 bool initSharedMem()
 {
-    screenWidth = SCREEN_WIDTH;
-    screenHeight = SCREEN_HEIGHT;
-
-    mouseLeftDown = mouseRightDown = false;
-    mouseX = mouseY = 0;
-
-    cameraAngleX = cameraAngleY = 45;
-    cameraDistance = CAMERA_DISTANCE;
-
-    drawMode = 0; // 0:fill, 1: wireframe, 2:points
-
     fboId = rboId = textureId = 0;
-    fboSupported = fboUsed = false;
-    playTime = renderToTextureTime = 0;
 
     return true;
 }
@@ -306,13 +267,10 @@ void clearSharedMem()
     textureId = 0;
 
     // clean up FBO, RBO
-    if(fboSupported)
-    {
         glDeleteFramebuffers(1, &fboId);
         fboId = 0;
         glDeleteRenderbuffers(1, &rboId);
         rboId = 0;
-    }
 }
 
 
@@ -342,14 +300,8 @@ main(int argc, char **argv)
   Display::load_model(argv[1]);
   Display::set_parameters(width, height, focal_length_x, focal_length_y, near, far);
 
-  glutInitWindowSize(width, height);
-  glutInitWindowPosition(100, 100);
-  glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
   glutInit(&argc, argv);
-
   glutCreateWindow("Assimp - Very simple OpenGL sample");
-  glutDisplayFunc(display_function);
-  glutReshapeFunc(reshape);
 
   // get a handle to the predefined STDOUT log stream and attach
   // it to the logging system. It remains active for all further
@@ -361,26 +313,6 @@ main(int argc, char **argv)
   // log messages to assimp_log.txt
   stream = aiGetPredefinedLogStream(aiDefaultLogStream_FILE, "assimp_log.txt");
   aiAttachLogStream(&stream);
-
-  glClearColor(0.1f, 0.1f, 0.1f, 1.f);
-
-  glEnable (GL_LIGHTING);
-  glEnable (GL_LIGHT0); // Uses default lighting parameters
-
-  glEnable (GL_DEPTH_TEST);
-
-  glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-  glEnable (GL_NORMALIZE);
-
-  // XXX docs say all polygons are emitted CCW, but tests show that some aren't.
-  if (getenv("MODEL_IS_BROKEN"))
-    glFrontFace (GL_CW);
-
-  glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
-
-  glutGet(GLUT_ELAPSED_TIME);
-
-
 
 
 
@@ -434,22 +366,32 @@ main(int argc, char **argv)
   //glDrawBuffer(GL_NONE);
   //glReadBuffer(GL_NONE);
 
-  // check FBO status
-      fboUsed = true;
-
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
+  glClearColor(0.1f, 0.1f, 0.1f, 1.f);
+
+  glEnable (GL_LIGHTING);
+  glEnable (GL_LIGHT0); // Uses default lighting parameters
+
+  glEnable (GL_DEPTH_TEST);
+
+  glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+  glEnable (GL_NORMALIZE);
+
+  // XXX docs say all polygons are emitted CCW, but tests show that some aren't.
+  if (getenv("MODEL_IS_BROKEN"))
+    glFrontFace (GL_CW);
+
+  glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
 
 
 
-  try
-  {
-    glutMainLoop();
-  } catch (const char * msg)
-  {
+  //glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-  }
+  reshape(width, height);
+
+  for(size_t i=0;i<100;++i)
+    display_function();
 
   // We added a log stream to the library, it's our job to disable it
   // again. This will definitely release the last resources allocated
