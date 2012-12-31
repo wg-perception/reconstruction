@@ -50,9 +50,9 @@ INCLUDE_DIRECTORIES(SYSTEM ${GLUT_INCLUDE_DIR}
                            ${OPENGL_INCLUDE_DIR}
 )
 
-ADD_EXECUTABLE(view_generator display.cpp
+ADD_EXECUTABLE(view_generator main.cpp
+                              model.cpp
                               renderer.cpp
-                              Model.cpp
                               ${EXTRA_SOURCES}
 )
 

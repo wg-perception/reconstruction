@@ -45,7 +45,7 @@
 
 #include <opencv2/core/core.hpp>
 
-#include "Model.h"
+#include "model.h"
 
 using Eigen::Matrix4d;
 

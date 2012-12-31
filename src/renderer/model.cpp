@@ -27,7 +27,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "Model.h"
+#include "model.h"
 
 Model::Model()
     :
