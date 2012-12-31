@@ -38,23 +38,26 @@
 
 #include <string>
 
-#include <boost/format.hpp>
-
 #include <eigen3/Eigen/Eigen>
 
+#define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 
 #include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
 
 #include "Model.h"
 
 using Eigen::Matrix4d;
 
-static double PI = 3.14159;
-
+template<typename T>
 void
-normalize_vector(float & x, float&y, float&z);
+normalize_vector(T & x, T&y, T&z)
+{
+  T norm = std::sqrt(x * x + y * y + z * z);
+  x /= norm;
+  y /= norm;
+  z /= norm;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -72,19 +75,13 @@ public:
   ~Display();
 
   void
-  load_model(const std::string & file_path);
-
-  void
   set_parameters(size_t width, size_t height, double focal_length_x, double focal_length_y, double near, double far);
-
-  void
-  reshape();
 
   void
   display();
 
   void
-  save_to_disk(GLuint fbo) const;
+  render(cv::Mat &image_out, cv::Mat &depth_out, cv::Mat &mask_out) const;
 
   const Model &
   model() const
@@ -115,7 +112,8 @@ public:
   {
     return focal_length_y_;
   }
-//private:
+
+private:
   void
   clean_buffers();
 
@@ -133,16 +131,42 @@ public:
   /** The render buffer object used for offline image rendering */
   GLuint texture_id_;
   aiVector3D scene_min_, scene_max_, scene_center_;
+  aiLogStream ai_stream_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/** Class that enables iterating viewpoint over a sphere.
+/** Class that enables iterating the viewpoint over a sphere.
  * This function is used to generate templates in LINE-MOD
  */
-class DisplayIterator
+class RendererIterator
 {
+public:
+  /**
+   * @param file_path the path of the mesh to render
+   */
+  RendererIterator(const std::string & file_path);
 
+  void
+  set_parameters(size_t width, size_t height, double focal_length_x, double focal_length_y, double near, double far);
+
+  /** Iterate to get to a different view
+   * We don't implement the postfix operator on purpose
+   * @return an incremented version of itself
+   */
+  RendererIterator &
+  operator++();
+
+  /**
+   * @return true if we are done with all the views, false otherwise
+   */
+  bool
+  isDone() const;
+
+  void
+  render(cv::Mat &image_out, cv::Mat &depth_out, cv::Mat &mask_out);
+private:
+  cv::Ptr<Display> renderer_;
 };
 
 #endif /* CAMERA_H_ */

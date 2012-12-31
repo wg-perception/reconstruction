@@ -33,22 +33,12 @@
  *
  */
 
-#define GL_GLEXT_PROTOTYPES
 #include "display.h"
 
 #include <iostream>
 #include <stdlib.h>
 
 #include <GL/glut.h>
-
-void
-normalize_vector(float & x, float&y, float&z)
-{
-  float norm = std::sqrt(x * x + y * y + z * z);
-  x /= norm;
-  y /= norm;
-  z /= norm;
-}
 
 Display::Display(const std::string & file_name)
     :
@@ -65,11 +55,21 @@ Display::Display(const std::string & file_name)
       scene_list_(0)
 {
   model_.LoadModel(file_name);
+
+  // get a handle to the predefined STDOUT log stream and attach
+  // it to the logging system. It remains active for all further
+  // calls to aiImportFile(Ex) and aiApplyPostProcessing.
+  ai_stream_ = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT, NULL);
+  aiAttachLogStream(&ai_stream_);
 }
 
 Display::~Display()
 {
   clean_buffers();
+  // We added a log stream to the library, it's our job to disable it
+  // again. This will definitely release the last resources allocated
+  // by Assimp.
+  aiDetachAllLogStreams();
 }
 
 void
@@ -151,22 +151,15 @@ Display::set_parameters(size_t width, size_t height, double focal_length_x, doub
   glEnable(GL_NORMALIZE);
 
   glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
-}
 
-void
-Display::reshape()
-{
+  // Initialize the projection
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
 
   double fx = Display::focal_length_x();
   double fy = Display::focal_length_y();
-  double fovy = 2 * atan(0.5 * height_ / fy) * 180 / PI;
+  double fovy = 2 * atan(0.5 * height_ / fy) * 180 / CV_PI;
   double aspect = (width_ * fy) / (height_ * fx);
-
-  // define the near and far clipping planes
-  double near = Display::near();
-  double far = Display::far();
 
   // set perspective
   gluPerspective(fovy, aspect, near, far);
@@ -215,11 +208,9 @@ Display::display()
   }
   unsigned int n_templates = ((angle_max - angle_min) / angle_step + 1) * n_points
                              * ((radius_max - radius_min) / radius_step + 1);
-  std::cout << n_templates << " templates: " << float(index * 100) / float(n_templates) << std::endl;
-  //std::cout << angle << " " << lon << " " << lat << " " << radius << std::endl;
 
   // from http://www.xsi-blog.com/archives/115
-  static float inc = PI * (3 - sqrt(5));
+  static float inc = CV_PI * (3 - sqrt(5));
   static float off = 2.0 / float(n_points);
   float y = n * off - 1 + (off / 2);
   float r = sqrt(1 - y * y);
@@ -251,7 +242,7 @@ Display::display()
   normalize_vector(x_right, y_right, z_right);
 
   // Rotate the up vector in that basis
-  float angle_rad = angle * PI / 180.;
+  float angle_rad = angle * CV_PI / 180.;
   float x_new_up = x_up * cos(angle_rad) + x_right * sin(angle_rad);
   float y_new_up = y_up * cos(angle_rad) + y_right * sin(angle_rad);
   float z_new_up = z_up * cos(angle_rad) + z_right * sin(angle_rad);
@@ -289,23 +280,26 @@ Display::display()
 
   glCallList(scene_list_);
 
-  Display::save_to_disk(fbo_id_);
+  cv::Mat image_out, depth_out, mask_out;
+  Display::render(image_out, depth_out, mask_out);
 
   ++index;
 }
 
 void
-Display::save_to_disk(GLuint fbo) const
+Display::render(cv::Mat &image_out, cv::Mat &depth_out, cv::Mat &mask_out) const
 {
-  cv::Mat image, depth;
+  // Create images to copy the buffers to
+  cv::Mat image;
   image.create(cv::Size(width_, height_), CV_8UC3);
-  depth.create(cv::Size(width_, height_), CV_32FC1);
+  cv::Mat_<float> depth(height_, width_);
 
   cv::Mat_<uchar> mask = cv::Mat_<uchar>::zeros(cv::Size(width_, height_));
 
   glFlush();
 
-  glBindFramebuffer(GL_FRAMEBUFFER_EXT, fbo);
+  // Get data from the depth/image buffers
+  glBindFramebuffer(GL_FRAMEBUFFER_EXT, fbo_id_);
   glReadBuffer(GL_DEPTH_ATTACHMENT);
   glReadPixels(0, 0, width_, height_, GL_DEPTH_COMPONENT, GL_FLOAT, depth.ptr());
 
@@ -313,7 +307,7 @@ Display::save_to_disk(GLuint fbo) const
   glReadPixels(0, 0, width_, height_, GL_BGR, GL_UNSIGNED_BYTE, image.ptr());
 
   float zNear = near_, zFar = far_;
-  cv::Mat_<float>::iterator it = depth.begin<float>(), end = depth.end<float>();
+  cv::Mat_<float>::iterator it = depth.begin(), end = depth.end();
   float max_allowed_z = zFar * 0.99;
 
   unsigned int i_min = width_, i_max = 0, j_min = height_, j_max = 0;
@@ -340,71 +334,9 @@ Display::save_to_disk(GLuint fbo) const
       }
     }
 
-  static size_t index = 0;
+  // Rescale the depth to be in millimeters
   cv::Mat depth_scale(cv::Size(width_, height_), CV_16UC1);
   depth.convertTo(depth_scale, CV_16UC1, 1e3);
-
-  /*cv::Mat depth_vis;
-   depth.convertTo(depth_vis, CV_8UC1, 400);
-
-   float min_x = 10000, max_x = 0;
-   float min_y = 10000, max_y = 0;
-   float min_z = 10000, max_z = 0;
-
-   // From http://nehe.gamedev.net/article/using_gluunproject/16013/
-   GLint viewport[4];
-   GLdouble modelview[16];
-   GLdouble projection[16];
-   GLfloat winX, winY, winZ;
-   GLdouble posX, posY, posZ;
-
-   glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-   glGetDoublev(GL_PROJECTION_MATRIX, projection);
-   glGetIntegerv(GL_VIEWPORT, viewport);
-
-   for(unsigned int j=0;j<4;++j)
-   std::cout << viewport[j] << " ";
-   std::cout << std::endl;
-   for(unsigned int i=0;i<16;++i) {
-   modelview[i] = 0;
-   std::cout << modelview[i] << " ";
-   }
-   modelview[0] = 1;
-   modelview[5] = 1;
-   modelview[10] = 1;
-   modelview[15] = 1;
-   std::cout << std::endl;
-   for(unsigned int j=0;j<16;++j)
-   std::cout << projection[j] << " ";
-   std::cout << std::endl;
-
-   it = depth.begin<float>();
-   for (unsigned int y = 0; y < image_height_; ++y)
-   for (unsigned int x = 0; x < image_width_; ++x, ++it)
-   {
-   if ((*it >= max_allowed_z) || (*it == 0))
-   continue;
-   winX = (float) x;
-   winY = (float) viewport[3] - (float) y;
-   glReadPixels(x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
-
-   gluUnProject(winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
-   std::cout << posZ << " " << (*it) << std::endl;
-   min_x = std::min(min_x, float(posX));
-   max_x = std::max(max_x, float(posX));
-   min_y = std::min(min_y, float(posY));
-   max_y = std::max(max_y, float(posY));
-   min_z = std::min(min_z, float(posZ));
-   max_z = std::max(max_z, float(posZ));
-   }
-   std::cout << min_x << " - " << max_x << " ---- " << min_y << " - " << max_y << " ---- " << min_z << " - " << max_z
-   << std::endl;
-
-   cv::namedWindow("toto");
-   cv::namedWindow("toto2");
-   cv::imshow("toto", depth_vis);
-   cv::imshow("toto2", mask);
-   cv::waitKey(0);*/
 
   // Crop the images, just so that they are smaller to write/read
   if (i_min > 0)
@@ -417,8 +349,29 @@ Display::save_to_disk(GLuint fbo) const
     ++j_max;
   cv::Rect rect(i_min, j_min, i_max - i_min + 1, j_max - j_min + 1);
 
-  cv::imwrite(boost::str(boost::format("depth_%05d.png") % (index)), depth_scale(rect));
-  cv::imwrite(boost::str(boost::format("image_%05d.png") % (index)), image(rect));
-  cv::imwrite(boost::str(boost::format("mask_%05d.png") % (index)), mask(rect));
-  ++index;
+  depth_scale(rect).copyTo(depth_out);
+  image(rect).copyTo(image_out);
+  mask(rect).copyTo(mask_out);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+RendererIterator::RendererIterator(const std::string & file_path)
+    :
+      renderer_(new Display(file_path))
+{
+}
+
+void
+RendererIterator::set_parameters(size_t width, size_t height, double focal_length_x, double focal_length_y, double near,
+                                 double far)
+{
+  renderer_->set_parameters(width, height, focal_length_x, focal_length_y, near, far);
+}
+
+void
+RendererIterator::render(cv::Mat &image_out, cv::Mat &depth_out, cv::Mat &mask_out)
+{
+  renderer_->display();
+  renderer_->render(image_out, depth_out, mask_out);
 }

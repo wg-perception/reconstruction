@@ -38,15 +38,15 @@
 #include <iostream>
 #include <stdlib.h>
 
-#include <GL/glut.h>
+#include <boost/format.hpp>
+
+#include <opencv2/highgui/highgui.hpp>
 
 #include "display.h"
 
 int
 main(int argc, char **argv)
 {
-  struct aiLogStream stream;
-
   // Define the display
   size_t width = 640, height = 480;
   double near = 0.1, far = 1000;
@@ -55,28 +55,17 @@ main(int argc, char **argv)
   // the model name can be specified on the command line.
   Display display = Display(std::string(argv[1]));
 
-  // get a handle to the predefined STDOUT log stream and attach
-  // it to the logging system. It remains active for all further
-  // calls to aiImportFile(Ex) and aiApplyPostProcessing.
-  stream = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT, NULL);
-  aiAttachLogStream(&stream);
-
-  // ... same procedure, but this stream now writes the
-  // log messages to assimp_log.txt
-  stream = aiGetPredefinedLogStream(aiDefaultLogStream_FILE, "assimp_log.txt");
-  aiAttachLogStream(&stream);
-
-
   display.set_parameters(width, height, focal_length_x, focal_length_y, near, far);
 
-  display.reshape();
-
-  for(size_t i=0;i<100;++i)
+  cv::Mat image, depth, mask;
+  for (size_t i = 0; i < 100; ++i)
+  {
     display.display();
+    display.render(image, depth, mask);
+    cv::imwrite(boost::str(boost::format("depth_%05d.png") % (i)), depth);
+    cv::imwrite(boost::str(boost::format("image_%05d.png") % (i)), image);
+    cv::imwrite(boost::str(boost::format("mask_%05d.png") % (i)), mask);
+  }
 
-  // We added a log stream to the library, it's our job to disable it
-  // again. This will definitely release the last resources allocated
-  // by Assimp.
-  aiDetachAllLogStreams();
   return 0;
 }
