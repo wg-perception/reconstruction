@@ -49,6 +49,11 @@
 
 using Eigen::Matrix4d;
 
+/** Function that normalizes a vector
+ * @param x the x component of the vector
+ * @param y the y component of the vector
+ * @param z the z component of the vector
+ */
 template<typename T>
 void
 normalize_vector(T & x, T&y, T&z)
@@ -64,54 +69,37 @@ normalize_vector(T & x, T&y, T&z)
 /** Class that displays a scene ina Frame Buffer Object
  * Inspired by http://www.songho.ca/opengl/gl_fbo.html
  */
-class Display
+class Renderer
 {
 public:
   /**
    * @param file_path the path of the mesh file
    */
-  Display(const std::string & file_path);
+  Renderer(const std::string & file_path);
 
-  ~Display();
+  ~Renderer();
 
   void
   set_parameters(size_t width, size_t height, double focal_length_x, double focal_length_y, double near, double far);
 
+  /** Similar to the gluLookAt function
+   * @param x the x position of the eye pointt
+   * @param y the y position of the eye point
+   * @param z the z position of the eye point
+   * @param upx the x direction of the up vector
+   * @param upy the y direction of the up vector
+   * @param upz the z direction of the up vector
+   */
   void
-  display();
+  lookAt(GLdouble x, GLdouble y, GLdouble z, GLdouble upx, GLdouble upy, GLdouble upz);
 
+  /** Renders the content of the current OpenGL buffers to images
+   * @param image_out the RGB image
+   * @param depth_out the depth image
+   * @param mask_out the mask image
+   */
   void
   render(cv::Mat &image_out, cv::Mat &depth_out, cv::Mat &mask_out) const;
-
-  const Model &
-  model() const
-  {
-    return model_;
-  }
-
-  const double
-  near()
-  {
-    return near_;
-  }
-
-  const double
-  far()
-  {
-    return far_;
-  }
-
-  const double
-  focal_length_x()
-  {
-    return focal_length_x_;
-  }
-
-  const double
-  focal_length_y()
-  {
-    return focal_length_y_;
-  }
 
 private:
   void
@@ -145,7 +133,7 @@ public:
   /**
    * @param file_path the path of the mesh to render
    */
-  RendererIterator(const std::string & file_path);
+  RendererIterator(const std::string & file_path, size_t n_points);
 
   void
   set_parameters(size_t width, size_t height, double focal_length_x, double focal_length_y, double near, double far);
@@ -161,12 +149,24 @@ public:
    * @return true if we are done with all the views, false otherwise
    */
   bool
-  isDone() const;
+  isDone() const
+  {
+    return (index_ >= n_points_);
+  }
 
   void
   render(cv::Mat &image_out, cv::Mat &depth_out, cv::Mat &mask_out);
 private:
-  cv::Ptr<Display> renderer_;
+  /** The number of points on the sphere */
+  size_t n_points_;
+  /** The index of the view point we are at now */
+  size_t index_;
+  /** The renderer object containing the scene and that will render images */
+  cv::Ptr<Renderer> renderer_;
+  /** Values for the angle sampling in degrees */
+  int angle_min_, angle_max_, angle_step_, angle_;
+  /** Values for the scale sampling */
+  float radius_min_, radius_max_, radius_step_, radius_;
 };
 
 #endif /* CAMERA_H_ */

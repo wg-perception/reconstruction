@@ -53,15 +53,14 @@ main(int argc, char **argv)
   double focal_length_x = 525, focal_length_y = 525;
 
   // the model name can be specified on the command line.
-  Display display = Display(std::string(argv[1]));
+  RendererIterator renderer_iterator = RendererIterator(std::string(argv[1]), 150);
 
-  display.set_parameters(width, height, focal_length_x, focal_length_y, near, far);
+  renderer_iterator.set_parameters(width, height, focal_length_x, focal_length_y, near, far);
 
   cv::Mat image, depth, mask;
-  for (size_t i = 0; i < 100; ++i)
+  for (size_t i = 0; !renderer_iterator.isDone(); ++i, ++renderer_iterator)
   {
-    display.display();
-    display.render(image, depth, mask);
+    renderer_iterator.render(image, depth, mask);
     cv::imwrite(boost::str(boost::format("depth_%05d.png") % (i)), depth);
     cv::imwrite(boost::str(boost::format("image_%05d.png") % (i)), image);
     cv::imwrite(boost::str(boost::format("mask_%05d.png") % (i)), mask);
