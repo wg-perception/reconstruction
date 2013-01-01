@@ -38,14 +38,12 @@
 #include <iostream>
 #include <stdlib.h>
 
-#include <GL/glut.h>
+#include <GL/gl.h>
 
-Renderer::Renderer(const std::string & file_name)
+Renderer::Renderer(const std::string & mesh_path)
     :
+      mesh_path_(mesh_path),
       angle_(0),
-      fbo_id_(0),
-      rbo_id_(0),
-      texture_id_(0),
       width_(0),
       height_(0),
       focal_length_x_(0),
@@ -54,8 +52,6 @@ Renderer::Renderer(const std::string & file_name)
       far_(0),
       scene_list_(0)
 {
-  model_.LoadModel(file_name);
-
   // get a handle to the predefined STDOUT log stream and attach
   // it to the logging system. It remains active for all further
   // calls to aiImportFile(Ex) and aiApplyPostProcessing.
@@ -65,27 +61,10 @@ Renderer::Renderer(const std::string & file_name)
 
 Renderer::~Renderer()
 {
-  clean_buffers();
   // We added a log stream to the library, it's our job to disable it
   // again. This will definitely release the last resources allocated
   // by Assimp.
   aiDetachAllLogStreams();
-}
-
-void
-Renderer::clean_buffers()
-{
-  if (texture_id_)
-    glDeleteTextures(1, &texture_id_);
-  texture_id_ = 0;
-
-  // clean up FBO, RBO
-  if (fbo_id_)
-    glDeleteFramebuffers(1, &fbo_id_);
-  fbo_id_ = 0;
-  if (rbo_id_)
-    glDeleteRenderbuffers(1, &rbo_id_);
-  rbo_id_ = 0;
 }
 
 void
@@ -114,30 +93,10 @@ Renderer::set_parameters(size_t width, size_t height, double focal_length_x, dou
 
   clean_buffers();
 
-  int argc = 0;
-  char **argv = 0;
+  // Initialize the OpenGL context
+  set_parameters_low_level();
 
-  // Create an OpenGL context
-  glutInit(&argc, argv);
-  // By doing so, the window is not open
-  glutInitDisplayMode(GLUT_DOUBLE);
-  glutCreateWindow("Assimp - Very simple OpenGL sample");
-
-  // create a framebuffer object
-  glGenFramebuffers(1, &fbo_id_);
-  glBindFramebuffer(GL_FRAMEBUFFER, fbo_id_);
-
-  // create a texture object
-  glGenTextures(1, &texture_id_);
-  glBindTexture(GL_TEXTURE_2D, texture_id_);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width_, height_, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_id_, 0);
-
-  // create a renderbuffer object to store depth info
-  glGenRenderbuffers(1, &rbo_id_);
-  glBindRenderbuffer(GL_RENDERBUFFER, rbo_id_);
-  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width_, height_);
-  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo_id_);
+  model_.LoadModel(mesh_path_);
 
   // Initialize the environment
   glClearColor(0.f, 0.f, 0.f, 1.f);
@@ -170,8 +129,7 @@ void
 Renderer::lookAt(GLdouble x, GLdouble y, GLdouble z, GLdouble upx, GLdouble upy, GLdouble upz)
 {
   float tmp;
-  glBindFramebuffer(GL_FRAMEBUFFER, fbo_id_);
-  glBindRenderbuffer(GL_RENDERBUFFER, rbo_id_);
+  lookAt_low_level();
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -222,12 +180,7 @@ Renderer::render(cv::Mat &image_out, cv::Mat &depth_out, cv::Mat &mask_out) cons
   glFlush();
 
   // Get data from the depth/image buffers
-  glBindFramebuffer(GL_FRAMEBUFFER_EXT, fbo_id_);
-  glReadBuffer(GL_DEPTH_ATTACHMENT);
-  glReadPixels(0, 0, width_, height_, GL_DEPTH_COMPONENT, GL_FLOAT, depth.ptr());
-
-  glReadBuffer(GL_COLOR_ATTACHMENT0);
-  glReadPixels(0, 0, width_, height_, GL_BGR, GL_UNSIGNED_BYTE, image.ptr());
+  render_low_level(image, depth);
 
   float zNear = near_, zFar = far_;
   cv::Mat_<float>::iterator it = depth.begin(), end = depth.end();
@@ -279,11 +232,11 @@ Renderer::render(cv::Mat &image_out, cv::Mat &depth_out, cv::Mat &mask_out) cons
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-RendererIterator::RendererIterator(const std::string & file_path, size_t n_points)
+RendererIterator::RendererIterator(Renderer *renderer, size_t n_points)
     :
       n_points_(n_points),
       index_(0),
-      renderer_(new Renderer(file_path)),
+      renderer_(renderer),
       angle_min_(-80),
       angle_max_(80),
       angle_step_(40),
@@ -293,13 +246,6 @@ RendererIterator::RendererIterator(const std::string & file_path, size_t n_point
       radius_step_(0.2),
       radius_(radius_min_)
 {
-}
-
-void
-RendererIterator::set_parameters(size_t width, size_t height, double focal_length_x, double focal_length_y, double near,
-                                 double far)
-{
-  renderer_->set_parameters(width, height, focal_length_x, focal_length_y, near, far);
 }
 
 RendererIterator &

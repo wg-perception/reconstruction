@@ -42,7 +42,13 @@
 
 #include <opencv2/highgui/highgui.hpp>
 
-#include "renderer.h"
+#define USE_RENDERER_GLUT 0
+
+#if USE_RENDERER_GLUT
+#include "renderer_glut.h"
+#else
+#include "renderer_osmesa.h"
+#endif
 
 int
 main(int argc, char **argv)
@@ -53,9 +59,15 @@ main(int argc, char **argv)
   double focal_length_x = 525, focal_length_y = 525;
 
   // the model name can be specified on the command line.
-  RendererIterator renderer_iterator = RendererIterator(std::string(argv[1]), 150);
+#if USE_RENDERER_GLUT
+  RendererGlut renderer = RendererGlut(std::string(argv[1]));
+#else
+  RendererOSMesa renderer = RendererOSMesa(std::string(argv[1]));
+#endif
 
-  renderer_iterator.set_parameters(width, height, focal_length_x, focal_length_y, near, far);
+  renderer.set_parameters(width, height, focal_length_x, focal_length_y, near, far);
+
+  RendererIterator renderer_iterator = RendererIterator(&renderer, 150);
 
   cv::Mat image, depth, mask;
   for (size_t i = 0; !renderer_iterator.isDone(); ++i, ++renderer_iterator)

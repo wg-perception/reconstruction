@@ -50,17 +50,43 @@ INCLUDE_DIRECTORIES(SYSTEM ${GLUT_INCLUDE_DIR}
                            ${OPENGL_INCLUDE_DIR}
 )
 
+# add a glut version of the renderer
+add_library(object_recognition_reconstruction_renderer_glut model.cpp
+                                                            renderer.cpp
+                                                            renderer_glut.cpp
+)
+target_link_libraries(object_recognition_reconstruction_renderer_glut ${EXTRA_LIBRARIES}
+                                                                      ${OpenCV_LIBRARIES}
+                                                                      ${OPENGL_LIBRARIES}
+                                                                      ${GLUT_LIBRARIES}
+                                                                      freeimage
+)
+
+# add an OSMesa version of the renderer
+add_library(${PROJECT_NAME}_renderer_osmesa model.cpp
+                                            renderer.cpp
+                                            renderer_osmesa.cpp
+)
+
+target_link_libraries(${PROJECT_NAME}_renderer_osmesa ${EXTRA_LIBRARIES}                                     
+                                                      ${OpenCV_LIBRARIES}
+                                                      OSMesa GLU
+                                                      freeimage
+)
+
+
 ADD_EXECUTABLE(view_generator main.cpp
                               model.cpp
-                              renderer.cpp
                               ${EXTRA_SOURCES}
 )
 
 SET_PROPERTY(TARGET view_generator PROPERTY DEBUG_POSTFIX ${ASSIMP_DEBUG_POSTFIX})
 
 TARGET_LINK_LIBRARIES(view_generator ${EXTRA_LIBRARIES}
-                                     ${OpenCV_LIBRARIES}
-                                     ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} IL ILU ILUT freeimage)
+                                     object_recognition_reconstruction_renderer_osmesa
+)
+#                                     ${OpenCV_LIBRARIES}
+#                                     ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} IL ILU ILUT freeimage)
 SET_TARGET_PROPERTIES(view_generator PROPERTIES
                                      OUTPUT_NAME view_generator
 )

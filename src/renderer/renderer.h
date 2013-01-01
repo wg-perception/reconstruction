@@ -33,17 +33,16 @@
  *
  */
 
-#ifndef CAMERA_H_
-#define CAMERA_H_
+#ifndef RENDERER_H_
+#define RENDERER_H_
 
 #include <string>
 
 #include <eigen3/Eigen/Eigen>
 
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-
 #include <opencv2/core/core.hpp>
+
+#include <GL/gl.h>
 
 #include "model.h"
 
@@ -77,6 +76,7 @@ public:
    */
   Renderer(const std::string & file_path);
 
+  virtual
   ~Renderer();
 
   void
@@ -101,9 +101,21 @@ public:
   void
   render(cv::Mat &image_out, cv::Mat &depth_out, cv::Mat &mask_out) const;
 
-private:
-  void
-  clean_buffers();
+protected:
+  virtual void
+  clean_buffers() = 0;
+
+  virtual void
+  set_parameters_low_level() = 0;
+
+  virtual void
+  lookAt_low_level() = 0;
+
+  virtual void
+  render_low_level(cv::Mat &image_out, cv::Mat &depth_out) const = 0;
+
+  /** Path of the mesh */
+  std::string mesh_path_;
 
   unsigned int width_, height_;
   double focal_length_x_, focal_length_y_, near_, far_;
@@ -112,13 +124,9 @@ private:
   Matrix4d matrix_;
   Model model_;
   GLuint scene_list_;
-  /** The frame buffer object used for offline rendering */
-  GLuint fbo_id_;
-  /** The render buffer object used for offline depth rendering */
-  GLuint rbo_id_;
-  /** The render buffer object used for offline image rendering */
-  GLuint texture_id_;
+
   aiVector3D scene_min_, scene_max_, scene_center_;
+  /** stream for storing the logs from Assimp */
   aiLogStream ai_stream_;
 };
 
@@ -133,10 +141,7 @@ public:
   /**
    * @param file_path the path of the mesh to render
    */
-  RendererIterator(const std::string & file_path, size_t n_points);
-
-  void
-  set_parameters(size_t width, size_t height, double focal_length_x, double focal_length_y, double near, double far);
+  RendererIterator(Renderer * renderer, size_t n_points);
 
   /** Iterate to get to a different view
    * We don't implement the postfix operator on purpose
@@ -169,4 +174,4 @@ private:
   float radius_min_, radius_max_, radius_step_, radius_;
 };
 
-#endif /* CAMERA_H_ */
+#endif /* RENDERER_H_ */
