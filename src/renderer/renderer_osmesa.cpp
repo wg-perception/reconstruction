@@ -54,7 +54,8 @@ RendererOSMesa::RendererOSMesa(const std::string & mesh_path)
 void
 RendererOSMesa::clean_buffers()
 {
-  OSMesaDestroyContext(ctx_);
+  if (ctx_)
+    OSMesaDestroyContext(ctx_);
 
   if (ctx_buffer_)
   {
@@ -66,19 +67,13 @@ RendererOSMesa::clean_buffers()
 void
 RendererOSMesa::set_parameters_low_level()
 {
-  ctx_ = OSMesaCreateContextExt(OSMESA_RGB, 16, 0, 0, NULL);
+  ctx_ = OSMesaCreateContextExt(OSMESA_RGB, 32, 0, 0, NULL);
 
   ctx_buffer_ = malloc(width_ * height_ * 3 * sizeof(GLubyte));
   OSMesaMakeCurrent(ctx_, ctx_buffer_, GL_UNSIGNED_BYTE, width_, height_);
 }
 
 void
-RendererOSMesa::lookAt_low_level()
+RendererOSMesa::bind_buffers() const
 {
-}
-
-void
-RendererOSMesa::render_low_level(cv::Mat &image, cv::Mat &depth) const
-{
-  image = cv::Mat_<cv::Vec3b>(height_, width_, reinterpret_cast<cv::Vec3b*>(ctx_buffer_));
 }

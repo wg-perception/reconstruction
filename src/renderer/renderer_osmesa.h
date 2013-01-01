@@ -68,10 +68,7 @@ private:
   set_parameters_low_level();
 
   virtual void
-  lookAt_low_level();
-
-  virtual void
-  render_low_level(cv::Mat &image, cv::Mat &depth) const;
+  bind_buffers() const;
 
   /** Off-Screen mesa context for pure software rendering */
   OSMesaContext ctx_;

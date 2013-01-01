@@ -68,12 +68,17 @@ add_library(${PROJECT_NAME}_renderer_osmesa model.cpp
                                             renderer_osmesa.cpp
 )
 
-target_link_libraries(${PROJECT_NAME}_renderer_osmesa ${EXTRA_LIBRARIES}                                     
+target_link_libraries(${PROJECT_NAME}_renderer_osmesa ${EXTRA_LIBRARIES}
                                                       ${OpenCV_LIBRARIES}
                                                       OSMesa GLU
                                                       freeimage
 )
 
+
+set(DO_GLUT False)
+if (${DO_GLUT})
+  add_definition(-DUSE_RENDERER_GLUT=1)
+endif()
 
 ADD_EXECUTABLE(view_generator main.cpp
                               model.cpp
@@ -82,11 +87,14 @@ ADD_EXECUTABLE(view_generator main.cpp
 
 SET_PROPERTY(TARGET view_generator PROPERTY DEBUG_POSTFIX ${ASSIMP_DEBUG_POSTFIX})
 
-TARGET_LINK_LIBRARIES(view_generator ${EXTRA_LIBRARIES}
-                                     object_recognition_reconstruction_renderer_osmesa
-)
-#                                     ${OpenCV_LIBRARIES}
-#                                     ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} IL ILU ILUT freeimage)
+TARGET_LINK_LIBRARIES(view_generator ${EXTRA_LIBRARIES})
+
+if (${DO_GLUT})
+  target_link_libraries(view_generator ${PROJECT_NAME}_renderer_glut)
+else()
+  target_link_libraries(view_generator ${PROJECT_NAME}_renderer_osmesa)
+endif()
+
 SET_TARGET_PROPERTIES(view_generator PROPERTIES
                                      OUTPUT_NAME view_generator
 )

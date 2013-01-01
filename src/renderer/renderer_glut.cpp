@@ -86,20 +86,8 @@ RendererGlut::set_parameters_low_level()
 }
 
 void
-RendererGlut::lookAt_low_level()
+RendererGlut::bind_buffers() const
 {
   glBindFramebuffer(GL_FRAMEBUFFER, fbo_id_);
   glBindRenderbuffer(GL_RENDERBUFFER, rbo_id_);
-}
-
-void
-RendererGlut::render_low_level(cv::Mat &image, cv::Mat &depth) const
-{
-  // Get data from the depth/image buffers
-  glBindFramebuffer(GL_FRAMEBUFFER_EXT, fbo_id_);
-  glReadBuffer(GL_DEPTH_ATTACHMENT);
-  glReadPixels(0, 0, width_, height_, GL_DEPTH_COMPONENT, GL_FLOAT, depth.ptr());
-
-  glReadBuffer(GL_COLOR_ATTACHMENT0);
-  glReadPixels(0, 0, width_, height_, GL_BGR, GL_UNSIGNED_BYTE, image.ptr());
 }

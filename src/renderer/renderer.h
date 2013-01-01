@@ -109,10 +109,7 @@ protected:
   set_parameters_low_level() = 0;
 
   virtual void
-  lookAt_low_level() = 0;
-
-  virtual void
-  render_low_level(cv::Mat &image_out, cv::Mat &depth_out) const = 0;
+  bind_buffers() const = 0;
 
   /** Path of the mesh */
   std::string mesh_path_;

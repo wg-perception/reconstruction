@@ -42,8 +42,6 @@
 
 #include <opencv2/highgui/highgui.hpp>
 
-#define USE_RENDERER_GLUT 0
-
 #if USE_RENDERER_GLUT
 #include "renderer_glut.h"
 #else

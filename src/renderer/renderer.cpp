@@ -128,8 +128,7 @@ Renderer::set_parameters(size_t width, size_t height, double focal_length_x, dou
 void
 Renderer::lookAt(GLdouble x, GLdouble y, GLdouble z, GLdouble upx, GLdouble upy, GLdouble upz)
 {
-  float tmp;
-  lookAt_low_level();
+  bind_buffers();
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -171,16 +170,22 @@ void
 Renderer::render(cv::Mat &image_out, cv::Mat &depth_out, cv::Mat &mask_out) const
 {
   // Create images to copy the buffers to
-  cv::Mat image;
-  image.create(cv::Size(width_, height_), CV_8UC3);
+  cv::Mat_<cv::Vec3b> image(height_, width_);
   cv::Mat_<float> depth(height_, width_);
-
   cv::Mat_<uchar> mask = cv::Mat_<uchar>::zeros(cv::Size(width_, height_));
 
   glFlush();
 
   // Get data from the depth/image buffers
-  render_low_level(image, depth);
+  bind_buffers();
+
+  // Deal with the RGB image
+  glReadBuffer(GL_COLOR_ATTACHMENT0);
+  glReadPixels(0, 0, width_, height_, GL_BGR, GL_UNSIGNED_BYTE, image.ptr());
+
+  // Deal with the depth image
+  glReadBuffer(GL_DEPTH_ATTACHMENT);
+  glReadPixels(0, 0, width_, height_, GL_DEPTH_COMPONENT, GL_FLOAT, depth.ptr());
 
   float zNear = near_, zFar = far_;
   cv::Mat_<float>::iterator it = depth.begin(), end = depth.end();

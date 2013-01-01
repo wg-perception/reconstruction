@@ -71,10 +71,7 @@ private:
   set_parameters_low_level();
 
   virtual void
-  lookAt_low_level();
-
-  virtual void
-  render_low_level(cv::Mat &image, cv::Mat &depth) const;
+  bind_buffers() const;
 
   /** The frame buffer object used for offline rendering */
   GLuint fbo_id_;
