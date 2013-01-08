@@ -3,7 +3,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/rgbd/rgbd.hpp>
 
-#include "../../../opencv_candidate/src/rgbd/samples/reconst3d/graph_optimizations.hpp"
+#include "../../../opencv_candidate/src/reconst3d/graph_optimizations.hpp"
 
 using namespace cv;
 using std::cout;

@@ -18,6 +18,7 @@ catkin_stack()
 find_package(ecto_pcl)
 find_package(ecto_image_pipeline)
 find_package(object_recognition_core)
+find_package(opencv_candidate)
 find_package(roscpp)
 catkin_project(object_recognition_reconstruction DEPENDS ecto ecto_image_pipeline ecto_pcl object_recognition_core)
 list(APPEND catkin_LIBRARIES /opt/ros/fuerte/lib/libmessage_filters.so

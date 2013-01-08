@@ -2,7 +2,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 //TODO: use splitted code
-#include "../../../opencv_candidate/src/rgbd/samples/reconst3d/reconst3d.hpp"
+#include <opencv_candidate_reconst3d/reconst3d.hpp>
 
 using namespace cv;
 using std::cout;
