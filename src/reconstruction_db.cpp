@@ -23,7 +23,7 @@ namespace reconstruction
     using namespace object_recognition_core::db;
     ObjectDbParameters params(ObjectDbParameters::COUCHDB);
     params.set_parameter("root", db_url);
-    ObjectDb db(params);
+    ObjectDbPtr db = params.generateDb();
     Document doc(db, "meshes");
     std::ifstream mesh_stream(mesh_file.c_str());
     doc.set_attachment_stream("mesh.ply", mesh_stream);
