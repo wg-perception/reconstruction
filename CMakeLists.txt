@@ -34,6 +34,7 @@ list(APPEND catkin_INCLUDE_DIRS #/opt/ros/fuerte/stacks/geometry/tf/include/
                                 #/opt/ros/fuerte/stacks/geometry/tf/srv_gen/cpp/include/
                                 #/opt/ros/fuerte/stacks/vision_opencv/cv_bridge/include/
                                 #/opt/ros/fuerte/stacks/image_common/image_transport/include/
+                                ${ecto_image_pipeline_INCLUDE_DIRS}
                                 ${object_recognition_core_INCLUDE_DIRS}
 )
 endif()
