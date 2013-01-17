@@ -7,7 +7,7 @@ find_package(PCL REQUIRED)
 
 if (${catkin_VERSION} VERSION_GREATER "0.5.28")
 find_package(catkin REQUIRED cv_bridge ecto ecto_image_pipeline ecto_pcl
-                             image_transport tf object_recognition_core opencv_candidate roscpp)
+                             tf object_recognition_core opencv_candidate roscpp)
 catkin_package(CATKIN_DEPENDS ecto ecto_image_pipeline ecto_pcl object_recognition_core opencv_candidate
                DEPENDS OpenCV PCL
 )
