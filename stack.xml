@@ -1,6 +1,6 @@
 <stack>
   <name>object_recognition_reconstruction</name>
-  <version>0.2.18</version>
+  <version>0.2.19</version>
   <description>basic 3d reconstruction of an object from aligned Kinect data</description>
   <author email="erublee@willowgarage.com">Ethan Rublee</author>
   <author email="vrabaud@willowgarage.com">Vincent Rabaud</author>
