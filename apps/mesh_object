@@ -52,10 +52,15 @@ FILTER_SCRIPT_PIVOTING='''
 <!DOCTYPE FilterScript>
 <FilterScript>
  <filter name="Surface Reconstruction: Ball Pivoting">
-  <Param type="RichAbsPerc" value="0.01" min="0" name="BallRadius" max="0.366624"/>
-  <Param type="RichFloat" value="50" name="Clustering"/>
+  <Param type="RichAbsPerc" value="0.02" min="0" name="BallRadius" max="0.366624"/>
+  <Param type="RichFloat" value="20" name="Clustering"/>
   <Param type="RichFloat" value="90" name="CreaseThr"/>
   <Param type="RichBool" value="false" name="DeleteFaces"/>
+ </filter>
+ <filter name="Laplacian Smooth">
+  <Param type="RichInt" value="3" name="stepSmoothNum"/>
+  <Param type="RichBool" value="true" name="Boundary"/>
+  <Param type="RichBool" value="false" name="Selected"/>
  </filter>
 </FilterScript>
 '''
@@ -65,7 +70,7 @@ def meshlab(filename_in, filename_out):
     import subprocess
     f = NamedTemporaryFile(delete=False)
     script = f.name
-    f.write(FILTER_SCRIPT)
+    f.write(FILTER_SCRIPT_PIVOTING)
     f.close()
     subprocess.check_call((['meshlabserver', '-i', filename_in, '-o', filename_out, '-s', script]))
     os.unlink(script)
