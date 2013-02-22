@@ -1,3 +1,5 @@
+.. _reconstruction:
+
 object_recognition_reconstruction: 3D Object Reconstruction
 ===========================================================
 
