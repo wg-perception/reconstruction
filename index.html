@@ -1,0 +1,153 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>object_recognition_reconstruction: 3D Object Reconstruction &mdash; object_recognition_reconstruction</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="object_recognition_reconstruction" href="#" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="#">object_recognition_reconstruction</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">object_recognition_reconstruction: 3D Object Reconstruction</a><ul>
+<li><a class="reference internal" href="#command-line">Command Line</a></li>
+<li><a class="reference internal" href="#web-interface">Web Interface</a></li>
+<li><a class="reference internal" href="#tips">Tips</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="object-recognition-reconstruction-3d-object-reconstruction">
+<h1>object_recognition_reconstruction: 3D Object Reconstruction<a class="headerlink" href="#object-recognition-reconstruction-3d-object-reconstruction" title="Permalink to this headline">¶</a></h1>
+<p><tt class="docutils literal"><span class="pre">Reconstruction</span></tt> provides a utility to create a 3d reconstruction of an object. For now, it creates
+an approximate untextured mesh from captured data, that is good enough for grasping.</p>
+<div class="section" id="command-line">
+<h2>Command Line<a class="headerlink" href="#command-line" title="Permalink to this headline">¶</a></h2>
+<p>From the command line, you want to execute the following command to compute all meshes and commit them to the local DB:</p>
+<div class="highlight-sh"><div class="highlight"><pre>mesh_object --all --visualize --commit
+</pre></div>
+</div>
+<p>Or tune your parameters using the appropriate command line arguments:</p>
+<div class="highlight-text"><div class="highlight"><pre>$ /home/vrabaud/workspace/recognition_kitchen_groovy/src/object_recognition_reconstruction/doc/source/../../apps/mesh_object --help
+usage: mesh_object [-h] [-s SESSION_ID] [--all] [--visualize]
+                   [--db_type DB_TYPE] [--db_root DB_ROOT_URL]
+                   [--db_collection DB_COLLECTION] [--commit]
+                   [--niter ITERATIONS] [--shell] [--gui] [--logfile LOGFILE]
+                   [--graphviz] [--dotfile DOTFILE] [--stats]
+
+Computes a surface mesh of an object in the database
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -s SESSION_ID, --session_id SESSION_ID
+                        The session id to reconstruct.
+  --all                 Compute meshes for all possible sessions.
+  --visualize           Turn on visualization
+
+Database Parameters:
+  --db_type DB_TYPE     The type of database used: one of [CouchDB]. Default:
+                        CouchDB
+  --db_root DB_ROOT_URL
+                        The database root URL to connect to. Default:
+                        http://localhost:5984
+  --db_collection DB_COLLECTION
+                        The database root URL to connect to. Default:
+                        object_recognition
+  --commit              Commit the data to the database.
+</pre></div>
+</div>
+</div>
+<div class="section" id="web-interface">
+<h2>Web Interface<a class="headerlink" href="#web-interface" title="Permalink to this headline">¶</a></h2>
+<p>Reconstruction also provides a web interface to visualize the different meshes. In your build folder, just run:</p>
+<div class="highlight-sh"><div class="highlight"><pre>make or_web_ui
+</pre></div>
+</div>
+<p>You can then visualize the meshes here: <a class="reference external" href="http://localhost:5984/or_web_ui/_design/viewer/index.html">http://localhost:5984/or_web_ui/_design/viewer/index.html</a></p>
+</div>
+<div class="section" id="tips">
+<h2>Tips<a class="headerlink" href="#tips" title="Permalink to this headline">¶</a></h2>
+<p>To create a textured mesh from a colored point cloud in meshlab:
+<a class="reference external" href="http://www.youtube.com/watch?v=JzmODsVQV7w">http://www.youtube.com/watch?v=JzmODsVQV7w</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="#">object_recognition_reconstruction</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013,  Willow Garage, Inc.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
