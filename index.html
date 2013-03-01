@@ -78,13 +78,75 @@
   <div class="section" id="object-recognition-reconstruction-3d-object-reconstruction">
 <span id="reconstruction"></span><h1>object_recognition_reconstruction: 3D Object Reconstruction<a class="headerlink" href="#object-recognition-reconstruction-3d-object-reconstruction" title="Permalink to this headline">¶</a></h1>
 <p><tt class="docutils literal"><span class="pre">Reconstruction</span></tt> provides a utility to create a 3d reconstruction of an object. For now, it creates
-an approximate untextured mesh from captured data, that is good enough for grasping.</p>
+an approximate untextured mesh from captured data, that is good enough for grasping. The algorithm simply merges
+the depth imags from several views and smoothes them a bit. Nothing smarted is done.</p>
 <div class="section" id="command-line">
 <h2>Command Line<a class="headerlink" href="#command-line" title="Permalink to this headline">¶</a></h2>
 <p>From the command line, you want to execute the following command to compute all meshes and commit them to the local DB:</p>
-<div class="highlight-sh"><div class="highlight"><pre>mesh_object --all --visualize --commit
+<div class="container">
+<button class="toggleable_button label_Non-ROS" onclick="
+function toggle(label) {
+  $('.toggleable_button').css({border: '2px outset', 'border-radius': '4px'});
+  $('.toggleable_button.label_' + label).css({border: '2px inset', 'border-radius': '4px'});
+  $('.toggleable_div').css('display', 'none');
+  $('.toggleable_div.label_' + label).css('display', 'block');
+};
+toggle('Non-ROS')">Non-ROS</button>
+<script>
+
+function toggle(label) {
+  $('.toggleable_button').css({border: '2px outset', 'border-radius': '4px'});
+  $('.toggleable_button.label_' + label).css({border: '2px inset', 'border-radius': '4px'});
+  $('.toggleable_div').css('display', 'none');
+  $('.toggleable_div.label_' + label).css('display', 'block');
+};
+
+$(document).ready(function() {
+  var classList =$('.toggleable_button').attr('class').split(/\s+/);
+  $.each( classList, function(index, item){
+    if (item.substring(0, 5) === 'label') {
+      toggle(item.substring(6));
+    };
+  });
+});
+</script>
+<button class="toggleable_button label_ROS" onclick="
+function toggle(label) {
+  $('.toggleable_button').css({border: '2px outset', 'border-radius': '4px'});
+  $('.toggleable_button.label_' + label).css({border: '2px inset', 'border-radius': '4px'});
+  $('.toggleable_div').css('display', 'none');
+  $('.toggleable_div.label_' + label).css('display', 'block');
+};
+toggle('ROS')">ROS</button>
+<script>
+
+function toggle(label) {
+  $('.toggleable_button').css({border: '2px outset', 'border-radius': '4px'});
+  $('.toggleable_button.label_' + label).css({border: '2px inset', 'border-radius': '4px'});
+  $('.toggleable_div').css('display', 'none');
+  $('.toggleable_div.label_' + label).css('display', 'block');
+};
+
+$(document).ready(function() {
+  var classList =$('.toggleable_button').attr('class').split(/\s+/);
+  $.each( classList, function(index, item){
+    if (item.substring(0, 5) === 'label') {
+      toggle(item.substring(6));
+    };
+  });
+});
+</script>
+</div>
+<div class="container">
+<div class="toggleable_div label_Non-ROS"><div class="highlight-sh"><div class="highlight"><pre>./apps/mesh_object --all --visualize --commit
 </pre></div>
 </div>
+</div></div>
+<div class="container">
+<div class="toggleable_div label_ROS"><div class="highlight-sh"><div class="highlight"><pre>rosrun object_recognition_reconstruction mesh_object --all --visualize --commit
+</pre></div>
+</div>
+</div></div>
 <p>Or tune your parameters using the appropriate command line arguments:</p>
 <div class="highlight-text"><div class="highlight"><pre>$ /home/vrabaud/workspace/recognition_kitchen_groovy/src/object_recognition_reconstruction/doc/source/../../apps/mesh_object --help
 usage: mesh_object [-h] [-s SESSION_ID] [--all] [--visualize]
