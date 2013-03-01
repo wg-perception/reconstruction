@@ -4,16 +4,29 @@ object_recognition_reconstruction: 3D Object Reconstruction
 ===========================================================
 
 ``Reconstruction`` provides a utility to create a 3d reconstruction of an object. For now, it creates
-an approximate untextured mesh from captured data, that is good enough for grasping.
+an approximate untextured mesh from captured data, that is good enough for grasping. The algorithm simply merges
+the depth imags from several views and smoothes them a bit. Nothing smarted is done.
 
 Command Line
 ------------
 
 From the command line, you want to execute the following command to compute all meshes and commit them to the local DB:
 
-.. code-block:: sh
+.. toggle_table::
+    :arg1: Non-ROS
+    :arg2: ROS
 
-    mesh_object --all --visualize --commit
+.. toggle:: Non-ROS
+
+   .. code-block:: sh
+
+      ./apps/mesh_object --all --visualize --commit
+
+.. toggle:: ROS
+   
+   .. code-block:: sh
+
+      rosrun object_recognition_reconstruction mesh_object --all --visualize --commit
 
 Or tune your parameters using the appropriate command line arguments:
     
