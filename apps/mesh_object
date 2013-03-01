@@ -1,21 +1,20 @@
 #!/usr/bin/env python
-import sys
-import argparse
-import os
-
-import ecto
-from ecto_opencv import calib, highgui, imgproc
-import object_recognition_core
-from object_recognition_core.db import tools as dbtools, models
 from ecto_image_pipeline.base import RescaledRegisteredDepth
+from ecto_opencv import calib, highgui, imgproc
+from object_recognition_core.db import Documents, ObjectDb, tools as dbtools, models
+from object_recognition_core.db.cells import ObservationReader
+from object_recognition_reconstruction import PointCloudTransform, PointCloudAccumulator
+from tempfile import NamedTemporaryFile
+import argparse
+import couchdb
+import ecto
 import ecto_image_pipeline.base
 import ecto_image_pipeline.conversion
-from object_recognition_reconstruction import PointCloudTransform, PointCloudAccumulator
 import ecto_pcl
-from tempfile import NamedTemporaryFile
-from object_recognition_core.db import Documents, ObjectDb
-from object_recognition_core.db.cells import ObservationReader
-import couchdb
+import object_recognition_core
+import os
+import sys
+import tempfile
 
 cloud_view = ecto_pcl.CloudViewer("Cloud Display", window_name="PCD Viewer")[:]
 imshows = dict(image=highgui.imshow('Image Display', name='image')[:], mask=highgui.imshow('Mask Display', name='mask')[:],
@@ -141,13 +140,14 @@ def simple_mesh_session(dbs, session, args):
     #finally write the ply to disk.
     ply_writer.inputs.__test__ = True
     ply_writer.process()
-    ply_name = 'cloud_%s_%05d.ply' % (str(session.id), 0)
-    mesh_name = 'cloud_%s.stl' % str(session.id)
+    dir_path = tempfile.mkdtemp()
+    ply_name = os.path.join(dir_path, 'cloud_%s_%05d.ply' % (str(session.id), 0))
+    mesh_name = os.path.join(dir_path, 'cloud_%s.stl' % str(session.id))
     meshlab(ply_name, mesh_name)
     if args.commit:
         upload_mesh(dbs, session, ply_name, mesh_name)
-        os.unlink(ply_name)
-        os.unlink(mesh_name)
+        os.rmdir(dir_path)
+
 ###################################################################################################################
 def parse_args():
     parser = argparse.ArgumentParser(description='Computes a surface mesh of an object in the database')
