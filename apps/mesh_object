@@ -13,6 +13,7 @@ import ecto_image_pipeline.conversion
 import ecto_pcl
 import object_recognition_core
 import os
+import shutil
 import sys
 import tempfile
 
@@ -142,11 +143,12 @@ def simple_mesh_session(dbs, session, args):
     ply_writer.process()
     dir_path = tempfile.mkdtemp()
     ply_name = os.path.join(dir_path, 'cloud_%s_%05d.ply' % (str(session.id), 0))
+    ply_name = 'cloud_%s_%05d.ply' % (str(session.id), 0)
     mesh_name = os.path.join(dir_path, 'cloud_%s.stl' % str(session.id))
     meshlab(ply_name, mesh_name)
     if args.commit:
         upload_mesh(dbs, session, ply_name, mesh_name)
-        os.rmdir(dir_path)
+        shutil.rmtree(dir_path)
 
 ###################################################################################################################
 def parse_args():
