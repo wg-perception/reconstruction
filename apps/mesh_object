@@ -190,3 +190,5 @@ if "__main__" == __name__:
             print "Could not load session with id:", args.session_id
             sys.exit(1)
         simple_mesh_session(dbs, session, args)
+    # do it again to create the view for meshes
+    dbs = dbtools.init_object_databases(couch)
