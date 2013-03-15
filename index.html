@@ -42,6 +42,7 @@
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">object_recognition_reconstruction: 3D Object Reconstruction</a><ul>
+<li><a class="reference internal" href="#install-dependencies">Install dependencies</a></li>
 <li><a class="reference internal" href="#command-line">Command Line</a></li>
 <li><a class="reference internal" href="#web-interface">Web Interface</a></li>
 <li><a class="reference internal" href="#tips">Tips</a></li>
@@ -77,9 +78,16 @@
             
   <div class="section" id="object-recognition-reconstruction-3d-object-reconstruction">
 <span id="reconstruction"></span><h1>object_recognition_reconstruction: 3D Object Reconstruction<a class="headerlink" href="#object-recognition-reconstruction-3d-object-reconstruction" title="Permalink to this headline">¶</a></h1>
-<p><tt class="docutils literal"><span class="pre">Reconstruction</span></tt> provides a utility to create a 3d reconstruction of an object. For now, it creates
-an approximate untextured mesh from captured data, that is good enough for grasping. The algorithm simply merges
-the depth imags from several views and smoothes them a bit. Nothing smarted is done.</p>
+<p><tt class="docutils literal"><span class="pre">Reconstruction</span></tt> provides a utility to create a 3d reconstruction of an object. For now, it creates an approximate untextured mesh from captured data, that is good enough for grasping. The algorithm simply merges the depth imags from several views and smoothes them a bit. Nothing smarted is done.</p>
+<div class="section" id="install-dependencies">
+<h2>Install dependencies<a class="headerlink" href="#install-dependencies" title="Permalink to this headline">¶</a></h2>
+<p>First install meshlab as it is used to go from the aggregation of depth maps to a mesh:</p>
+<blockquote>
+<div><div class="highlight-sh"><div class="highlight"><pre>sudo apt-get install meshlab
+</pre></div>
+</div>
+</div></blockquote>
+</div>
 <div class="section" id="command-line">
 <h2>Command Line<a class="headerlink" href="#command-line" title="Permalink to this headline">¶</a></h2>
 <p>From the command line, you want to execute the following command to compute all meshes and commit them to the local DB:</p>
@@ -187,8 +195,7 @@ Database Parameters:
 </div>
 <div class="section" id="tips">
 <h2>Tips<a class="headerlink" href="#tips" title="Permalink to this headline">¶</a></h2>
-<p>To create a textured mesh from a colored point cloud in meshlab:
-<a class="reference external" href="http://www.youtube.com/watch?v=JzmODsVQV7w">http://www.youtube.com/watch?v=JzmODsVQV7w</a></p>
+<p>To create a textured mesh from a colored point cloud in meshlab: <a class="reference external" href="http://www.youtube.com/watch?v=JzmODsVQV7w">http://www.youtube.com/watch?v=JzmODsVQV7w</a></p>
 </div>
 </div>
 
