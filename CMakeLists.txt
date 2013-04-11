@@ -31,6 +31,12 @@ install(PROGRAMS ${PROJECT_SOURCE_DIR}/apps/mesh_object
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+if (ROS_FUERTE_FOUND)
+install(FILES ${PROJECT_SOURCE_DIR}/manifest.xml
+        DESTINATION share/${PROJECT_NAME}
+)
+endif()
+
 # add tests
 option(BUILD_TEST "Build tests" ON)
 if(BUILD_TEST)
