@@ -3,8 +3,8 @@
   <version>0.2.23</version>
   <description>basic 3d reconstruction of an object from aligned Kinect data</description>
   <author email="erublee@willowgarage.com">Ethan Rublee</author>
-  <author email="vrabaud@willowgarage.com">Vincent Rabaud</author>
-  <maintainer email="vrabaud@willowgarage.com">Vincent Rabaud</maintainer>
+  <author email="vincent.rabaud@gmail.com">Vincent Rabaud</author>
+  <maintainer email="vincent.rabaud@gmail.com">Vincent Rabaud</maintainer>
   <license>BSD></license>
 
   <url>http://ecto.willowgarage.com/recognition</url>
