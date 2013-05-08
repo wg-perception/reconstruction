@@ -91,17 +91,17 @@ def simple_mesh_session(dbs, session, args):
     point_cloud_converter = ecto_image_pipeline.conversion.MatToPointCloudXYZRGB('To Point Cloud')
     pre_voxel = ecto_pcl.VoxelGrid("Pre Voxel Decimation", leaf_size=0.005)
     to_ecto_pcl = ecto_pcl.PointCloudT2PointCloud('converter', format=ecto_pcl.XYZRGB)
+    K_converter = calib.KConverter()
     plasm = ecto.Plasm()
     plasm.connect(
       observation_dealer[:] >> db_reader['document'],
+      db_reader['depth', 'image', 'mask'] >> rescale_depth['depth', 'image', 'mask'],
       db_reader['K'] >> depthTo3d['K'],
-      db_reader['image'] >> rescale_depth['image'],
-      db_reader['depth'] >> rescale_depth['depth'],
-      rescale_depth[:] >> depthTo3d['depth'],
+      rescale_depth['depth'] >> depthTo3d['depth'],
       depthTo3d['points3d'] >> point_cloud_converter['points'],
       db_reader['image'] >> point_cloud_converter['image'],
       erode['image'] >> point_cloud_converter['mask'],
-      db_reader['mask'] >> erode['image'],
+      rescale_depth['mask'] >> erode['image'],
       db_reader['R', 'T'] >> point_cloud_transform['R', 'T'],
       point_cloud_converter['point_cloud'] >> to_ecto_pcl[:],
       to_ecto_pcl[:] >> pre_voxel['input'],
