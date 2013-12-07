@@ -20,6 +20,7 @@
   <run_depend>ecto</run_depend>
   <run_depend>ecto_image_pipeline</run_depend>
   <run_depend>ecto_pcl</run_depend>
+  <run_depend>meshlab</run_depend>
   <run_depend>object_recognition_core</run_depend>
   <run_depend>opencv2</run_depend>
   <run_depend>opencv_candidate</run_depend>
