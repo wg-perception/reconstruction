@@ -5,7 +5,7 @@ find_package(catkin)
 find_package(OpenCV REQUIRED)
 find_package(PCL REQUIRED)
 
-find_package(catkin REQUIRED ecto ecto_image_pipeline ecto_pcl
+find_package(catkin REQUIRED cmake_modules ecto ecto_image_pipeline ecto_pcl
                              object_recognition_core opencv_candidate roscpp)
 catkin_package(CATKIN_DEPENDS ecto ecto_image_pipeline ecto_pcl object_recognition_core opencv_candidate
                DEPENDS OpenCV PCL

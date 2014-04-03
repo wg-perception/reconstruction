@@ -9,6 +9,7 @@
 
   <url>http://wg-perception.github.io/reconstruction/</url>
 
+  <build_depend>cmake_modules</build_depend>
   <build_depend>ecto</build_depend>
   <build_depend>ecto_image_pipeline</build_depend>
   <build_depend>ecto_pcl</build_depend>
