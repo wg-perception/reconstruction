@@ -1,5 +1,5 @@
-Forthcoming
------------
+0.3.1 (2014-07-27)
+------------------
 * no need to depend on OpenCV as we get it by transition
 * get the code to compile under Indigo
 * Contributors: Vincent Rabaud
