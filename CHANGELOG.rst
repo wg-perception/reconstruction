@@ -1,3 +1,13 @@
+Forthcoming
+-----------
+* no need to depend on OpenCV as we get it by transition
+* get the code to compile under Indigo
+* Contributors: Vincent Rabaud
+
+* no need to depend on OpenCV as we get it by transition
+* get the code to compile under Indigo
+* Contributors: Vincent Rabaud
+
 0.3.0 (2013-12-07 13:13:06 -0800)
 ---------------------------------
 - drop Fuerte support
