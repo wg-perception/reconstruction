@@ -1,3 +1,8 @@
+Forthcoming
+-----------
+* use local code to convert OpenCV to Eigen
+* Contributors: Vincent Rabaud
+
 0.3.1 (2014-07-27)
 ------------------
 * no need to depend on OpenCV as we get it by transition
