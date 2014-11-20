@@ -1,5 +1,5 @@
-Forthcoming
------------
+0.3.2 (2014-11-21)
+------------------
 * use local code to convert OpenCV to Eigen
 * Contributors: Vincent Rabaud
 
