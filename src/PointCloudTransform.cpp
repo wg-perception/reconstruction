@@ -21,14 +21,45 @@
 #include <pcl/search/kdtree.h>
 #include <pcl/filters/voxel_grid.h>
 #include "opencv2/core/core.hpp"
+#include <opencv2/core/eigen.hpp>
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/core/eigen.hpp>
 #include <fstream>
 
-#include <ecto_image_pipeline/pcl/conversions.hpp>
 #include <ecto_pcl/ecto_pcl.hpp>
+
+/**
+ * p = R*x + T
+ * if inverse:
+ *  x = R^1*(p - T)
+ */
+inline Eigen::Affine3f
+RT2Transform(cv::Mat& R, cv::Mat& T, bool inverse)
+{
+  //convert the tranform from our fiducial markers to
+  //the Eigen
+  Eigen::Matrix<float, 3, 3> eR;
+  Eigen::Vector3f eT;
+  cv::cv2eigen(R, eR);
+  cv::cv2eigen(T, eT);
+  // p = R*x + T
+  Eigen::Affine3f transform;
+  if (inverse)
+  {
+    //x = R^1*(p - T)
+    transform = Eigen::Translation3f(-eT);
+    transform.prerotate(eR.transpose());
+  }
+  else
+  {
+    //p = R*x + T
+    transform = Eigen::AngleAxisf(eR);
+    transform.translate(eT);
+  }
+  return transform;
+}
 
 using ecto::tendrils;
 namespace object_recognition
@@ -81,7 +112,7 @@ namespace object_recognition
         pcl::concatenateFields(*cloud, normals, *cloud_with_normals);
 
         bool inverse = true;
-        Eigen::Affine3f transform = image_pipeline::RT2Transform(*R, *T, inverse); //compute the inverse transform
+        Eigen::Affine3f transform = RT2Transform(*R, *T, inverse); //compute the inverse transform
         if (*do_transform)
         {
           CloudNormalT::Ptr tempc(new CloudNormalT);
