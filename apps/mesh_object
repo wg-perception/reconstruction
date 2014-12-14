@@ -64,7 +64,7 @@ FILTER_SCRIPT_PIVOTING='''
  </filter>
 </FilterScript>
 '''
-#meshlabserver -i cloud_44ed68c2b66cc8aefc7df45fd63c4ac8_00000.ply -o mug.stl -s meshlab.xml.mlx 
+#meshlabserver -i cloud_44ed68c2b66cc8aefc7df45fd63c4ac8_00000.ply -o mug.stl -s meshlab.xml.mlx
 
 def meshlab(filename_in, filename_out):
     import subprocess
@@ -83,7 +83,7 @@ def simple_mesh_session(dbs, session, args):
     db_reader = ObservationReader('Database Source')
 
     #observation dealer will deal out each observation id.
-    observation_dealer = ecto.Dealer(tendril=db_reader.inputs.at('document'), iterable=Documents(ObjectDb(db_params), obs_ids))
+    observation_dealer = ecto.Dealer(tendril=db_reader.inputs.at('document'), iterable=Documents(ObjectDb(db_params), list(obs_ids)))
     depthTo3d = calib.DepthTo3d('Depth ~> 3D')
     erode = imgproc.Erode('Mask Erosion', kernel=3) #-> 7x7
     rescale_depth = RescaledRegisteredDepth('Depth scaling') #this is for SXGA mode scale handling.
