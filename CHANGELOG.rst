@@ -1,3 +1,10 @@
+Forthcoming
+-----------
+* Merge pull request `#3 <https://github.com/wg-perception/reconstruction/issues/3>`_ from garaemon/fix-obs-ids-tuple
+  cast obs_ids to list
+* cast obs_ids to list
+* Contributors: Ryohei Ueda, Vincent Rabaud
+
 0.3.2 (2014-11-21)
 ------------------
 * use local code to convert OpenCV to Eigen
