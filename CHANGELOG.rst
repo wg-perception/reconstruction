@@ -1,5 +1,5 @@
-Forthcoming
------------
+0.3.3 (2014-12-14)
+------------------
 * Merge pull request `#3 <https://github.com/wg-perception/reconstruction/issues/3>`_ from garaemon/fix-obs-ids-tuple
   cast obs_ids to list
 * cast obs_ids to list
