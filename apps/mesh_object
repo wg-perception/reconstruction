@@ -60,6 +60,7 @@ FILTER_SCRIPT_PIVOTING='''
  <filter name="Laplacian Smooth">
   <Param type="RichInt" value="3" name="stepSmoothNum"/>
   <Param type="RichBool" value="true" name="Boundary"/>
+  <Param type="RichBool" value="false" name="cotangentWeight"/>
   <Param type="RichBool" value="false" name="Selected"/>
  </filter>
 </FilterScript>
