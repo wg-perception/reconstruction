@@ -73,7 +73,8 @@ def meshlab(filename_in, filename_out):
     script = f.name
     f.write(FILTER_SCRIPT_PIVOTING)
     f.close()
-    subprocess.check_call((['meshlabserver', '-i', filename_in, '-o', filename_out, '-s', script]))
+    cmd = 'sudo xvfb-run -a meshlabserver -i '+filename_in+' -s '+script+' -o '+filename_out
+    subprocess.Popen(cmd, env={"LC_NUMERIC": "C"}, cwd=os.getcwd(), shell=True).wait()
     os.unlink(script)
 
 def simple_mesh_session(dbs, session, args):
