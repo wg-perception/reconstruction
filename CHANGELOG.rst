@@ -1,3 +1,10 @@
+Forthcoming
+-----------
+* re-writing of #5 without sudo. Needs testing
+* Add a missing parameter to the Laplacian Smooth filter (cotangentWeight)
+* clean extensions
+* Contributors: Jorge Santos Simón, Vincent Rabaud
+
 0.3.3 (2014-12-14)
 ------------------
 * Merge pull request `#3 <https://github.com/wg-perception/reconstruction/issues/3>`_ from garaemon/fix-obs-ids-tuple
