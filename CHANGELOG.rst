@@ -1,5 +1,5 @@
-Forthcoming
------------
+0.3.4 (2015-04-20)
+------------------
 * re-writing of #5 without sudo. Needs testing
 * Add a missing parameter to the Laplacian Smooth filter (cotangentWeight)
 * clean extensions
