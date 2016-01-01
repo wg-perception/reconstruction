@@ -11,6 +11,7 @@ ectomodule(object_recognition_reconstruction DESTINATION ./
   module.cpp
   #surfel_conversion.cpp
   #surfels.cpp
+  MatToPointCloud.cpp
   reconstruction_db.cpp
   #SurfelReconstruction.cpp
   PointCloudTransform.cpp
