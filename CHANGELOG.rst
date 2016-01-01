@@ -1,5 +1,5 @@
-Forthcoming
------------
+0.3.5 (2016-01-01)
+------------------
 * Fix the bad conversion dependency.
   ecto_image_pipelne is not compiled with PCL anymore, hence the
   loss of the conversions cells. Fixes `#6 <https://github.com/wg-perception/reconstruction/issues/6>`_
