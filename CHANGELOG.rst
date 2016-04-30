@@ -1,5 +1,5 @@
-Forthcoming
------------
+0.3.6 (2016-04-30)
+------------------
 * fix PCL compilation
 * Fix poisson script. Enhance ball pivoting script
 * Contributors: JimmyDaSilva, Vincent Rabaud
