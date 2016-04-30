@@ -4,6 +4,9 @@ project(object_recognition_reconstruction)
 find_package(catkin)
 find_package(OpenCV REQUIRED)
 find_package(PCL REQUIRED)
+# Remove vtkproj4 from PCL_LIBRARIES as bug
+# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=819741
+list(REMOVE_ITEM PCL_LIBRARIES vtkproj4)
 
 find_package(catkin REQUIRED cmake_modules ecto ecto_image_pipeline ecto_pcl
                              object_recognition_core opencv_candidate roscpp)
