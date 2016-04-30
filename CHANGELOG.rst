@@ -1,3 +1,9 @@
+Forthcoming
+-----------
+* fix PCL compilation
+* Fix poisson script. Enhance ball pivoting script
+* Contributors: JimmyDaSilva, Vincent Rabaud
+
 0.3.5 (2016-01-01)
 ------------------
 * Fix the bad conversion dependency.
